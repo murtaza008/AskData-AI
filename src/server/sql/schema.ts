@@ -60,6 +60,11 @@ function cached(key: string, ttlMs: number, load: () => Promise<SchemaTable[]>):
   const hit = cache.get(key);
   if (hit && hit.expires > Date.now()) return hit.tables;
 
+  // Keep the map from growing: forget everything that has expired.
+  for (const [existingKey, entry] of cache) {
+    if (entry.expires <= Date.now()) cache.delete(existingKey);
+  }
+
   const tables = load();
   cache.set(key, { expires: Date.now() + ttlMs, tables });
   // Never cache a failure (e.g. the database was still waking up).
@@ -195,12 +200,23 @@ export function getAnalyticsTables(): Promise<SchemaTable[]> {
 }
 
 /** Tables this user uploaded (and that have not expired). */
-export function getUploadTables(userId: string): Promise<SchemaTable[]> {
-  return cached(`uploads:${userId}`, UPLOADS_TTL_MS, async () => {
-    const uploads = await prisma.upload.findMany({
-      where: { userId, expiresAt: { gt: new Date() } },
-      select: { tableName: true, originalName: true },
-    });
+export async function getUploadTables(userId: string): Promise<SchemaTable[]> {
+  // Which uploads exist is read from the database on EVERY request. On
+  // serverless hosts each route runs in its own instance, so an in-memory
+  // "this user's uploads" cache cleared by the upload route would stay stale
+  // everywhere else. Only the expensive part (introspecting the tables) is
+  // cached, keyed by the exact set of tables — a new or deleted upload changes
+  // the key, so no instance can serve an outdated list.
+  const uploads = await prisma.upload.findMany({
+    where: { userId, expiresAt: { gt: new Date() } },
+    select: { id: true, tableName: true, originalName: true },
+    orderBy: { tableName: "asc" },
+  });
+  if (uploads.length === 0) return [];
+
+  // Upload ids (not table names) so a re-uploaded file with the same name is a new key.
+  const key = `uploads:${userId}:${uploads.map((upload) => upload.id).join(",")}`;
+  return cached(key, UPLOADS_TTL_MS, async () => {
     const tables = await loadTables(
       UPLOADS_SCHEMA,
       uploads.map((upload) => upload.tableName),
@@ -213,8 +229,11 @@ export function getUploadTables(userId: string): Promise<SchemaTable[]> {
   });
 }
 
+/** Drop this instance's cached introspection for a user (other instances rely on the cache key). */
 export function invalidateUploadTables(userId: string): void {
-  cache.delete(`uploads:${userId}`);
+  for (const key of cache.keys()) {
+    if (key.startsWith(`uploads:${userId}:`)) cache.delete(key);
+  }
 }
 
 /** Everything a given user may query: the demo dataset plus their own uploads. */
