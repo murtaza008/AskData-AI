@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-franklin), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 6px;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-popover: var(--popover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-soft: var(--highlight-soft);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-sql-keyword: var(--sql-keyword);
+  --color-sql-string: var(--sql-string);
+  --color-sql-number: var(--sql-number);
+  --color-sql-fn: var(--sql-fn);
+}
+
+/* Warm paper + ink editorial theme. */
+:root {
+  --background: oklch(0.955 0.012 80);
+  --foreground: oklch(0.2 0.008 60);
+  --card: oklch(0.985 0.006 85);
+  --popover: oklch(0.985 0.006 85);
+  --primary: oklch(0.22 0.01 60);
+  --primary-hover: oklch(0.32 0.01 60);
+  --primary-foreground: oklch(0.97 0.01 85);
+  --muted: oklch(0.92 0.014 80);
+  --muted-foreground: oklch(0.45 0.012 60);
+  --highlight: oklch(0.55 0.18 33);
+  --highlight-soft: oklch(0.62 0.17 33 / 0.12);
+  --destructive: oklch(0.52 0.19 28);
+  --success: oklch(0.45 0.1 150);
+  --border: oklch(0.86 0.016 75);
+  --ring: oklch(0.55 0.18 33);
+  --sql-keyword: oklch(0.34 0.07 255);
+  --sql-string: oklch(0.55 0.18 33);
+  --sql-number: oklch(0.5 0.1 150);
+  --sql-fn: oklch(0.55 0.12 70);
+  --shadow-pop: 0 8px 24px -12px oklch(0.2 0.01 60 / 0.2);
+
+  /* Chart series: a categorical palette validated for colour-vision
+     deficiency and contrast in each theme. Assigned in fixed order. */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-5: #e87ba4;
+  --chart-6: #008300;
+  --chart-7: #6250d6;
+  --chart-8: #e34948;
+  --chart-grid: oklch(0.89 0.012 75);
+}
+
+.dark {
+  --background: oklch(0.18 0.006 60);
+  --foreground: oklch(0.93 0.012 85);
+  --card: oklch(0.22 0.007 60);
+  --popover: oklch(0.22 0.007 60);
+  --primary: oklch(0.93 0.012 85);
+  --primary-hover: oklch(0.85 0.012 85);
+  --primary-foreground: oklch(0.18 0.006 60);
+  --muted: oklch(0.26 0.008 60);
+  --muted-foreground: oklch(0.72 0.012 70);
+  --highlight: oklch(0.7 0.16 35);
+  --highlight-soft: oklch(0.7 0.16 35 / 0.15);
+  --destructive: oklch(0.68 0.17 28);
+  --success: oklch(0.7 0.12 150);
+  --border: oklch(0.32 0.008 60);
+  --ring: oklch(0.7 0.16 35);
+  --sql-keyword: oklch(0.75 0.08 245);
+  --sql-string: oklch(0.72 0.15 35);
+  --sql-number: oklch(0.72 0.1 150);
+  --sql-fn: oklch(0.78 0.11 80);
+  --shadow-pop: 0 8px 24px -12px oklch(0 0 0 / 0.6);
+
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-5: #d55181;
+  --chart-6: #008300;
+  --chart-7: #9085e9;
+  --chart-8: #e66767;
+  --chart-grid: oklch(0.29 0.008 60);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  button:not(:disabled),
+  [role="button"],
+  summary {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--highlight-soft);
+  }
+}
+
+/* Small caps label used for section and field headings. */
+@utility label-caps {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted-foreground);
+}
+
+/* Monospaced, column-aligned figures. */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility shadow-pop {
+  box-shadow: var(--shadow-pop);
+}
+
+/* A key figure highlighted inside an insight sentence. */
+@utility key-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92em;
+  font-weight: 500;
+  color: var(--color-highlight);
+  background: var(--color-highlight-soft);
+  padding: 1px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@utility animate-rise {
+  animation: rise-in 0.28s ease-out both;
+}
+
+/* Landing hero backdrop: faint ruled grid that drifts and fades out downward. */
+@keyframes grid-drift {
+  to {
+    background-position: 48px 48px;
+  }
+}
+
+@utility hero-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.45;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 20%, transparent 75%);
+  animation: grid-drift 14s linear infinite;
+}
+
+/* Blinking text cursor. */
+@keyframes caret-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@utility caret {
+  animation: caret-blink 1.1s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,102 @@
+// AskData AI — application data.
+//
+// Everything here lives in the `app` Postgres schema and is only ever touched
+// through Prisma with the owner connection (DATABASE_URL). The AI agent never
+// sees these tables: it connects with a separate read-only role that has no
+// privileges on `app` at all (see sql/01-readonly-role.sql).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["app"]
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  /// The shared public demo account. Demo users get a daily question quota.
+  isDemo       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  conversations Conversation[]
+  pinnedCharts  PinnedChart[]
+  uploads       Upload[]
+
+  @@schema("app")
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  turns Turn[]
+
+  @@index([userId, updatedAt(sort: Desc)])
+  @@schema("app")
+}
+
+/// One question plus the agent's full answer (insight, chart spec, SQL, rows
+/// and the step trace), stored as JSON so history renders without re-running.
+model Turn {
+  id             String   @id @default(uuid())
+  conversationId String
+  question       String
+  /// `AgentAnswer` from src/lib/agent/types.ts
+  answer         Json
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@schema("app")
+}
+
+/// A chart saved to the dashboard. Only the SQL and chart spec are stored —
+/// the data is re-queried (through the same safety pipeline) on every load.
+model PinnedChart {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  question  String
+  sql       String
+  /// `ChartSpec` from src/lib/agent/types.ts
+  chart     Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@schema("app")
+}
+
+/// Metadata for a CSV a user loaded into the `uploads` schema.
+model Upload {
+  id           String   @id @default(uuid())
+  userId       String
+  /// Physical table name inside the `uploads` schema, e.g. `u_3fa9c2d1_sales`.
+  tableName    String   @unique
+  originalName String
+  /// `UploadColumn[]` from src/lib/uploads/types.ts
+  columns      Json
+  rowCount     Int
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+  @@schema("app")
+}
