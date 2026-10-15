@@ -1,5 +1,17 @@
 # AskData AI
 
+**Ask your database a question in plain English, get the answer, the chart and the exact SQL.**
+
+[![Live demo](https://img.shields.io/badge/demo-live-22c55e?style=flat-square)](https://ask-data-ai-ten.vercel.app/)
+![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?style=flat-square&logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Prisma 7](https://img.shields.io/badge/Prisma-7-2D3748?style=flat-square&logo=prisma)
+![Postgres](https://img.shields.io/badge/Neon-Postgres-00E599?style=flat-square&logo=postgresql&logoColor=white)
+![Gemini](https://img.shields.io/badge/AI-Gemini%20%7C%20OpenAI%20%7C%20Claude-8E75B2?style=flat-square)
+
+**Live demo:** https://ask-data-ai-ten.vercel.app/ — choose **Try the demo**
+(`demo@askdata.app` / `askdata-demo`), no sign-up needed.
+
 An AI data analyst. Ask a question about a database in plain English and get back
 a written insight, a chart, the result table, and the exact SQL that produced them.
 
@@ -8,13 +20,16 @@ database**: the model's SQL runs through a read-only Postgres role, a parser-bas
 validator, a statement timeout and an enforced row limit.
 
 - **Ask** in plain English; watch the agent work step by step ("Reading schema…", "Running query…", "Fixing query…")
-- **Verify** every answer: chart, data table, collapsible SQL with copy, CSV export
-- **Pin** charts to a dashboard that re-runs their SQL on every load
+- **Verify** every answer: chart (bar / line / pie, switchable), data table, collapsible SQL with copy, CSV export
+- **Follow up**: each answer suggests next questions, and the conversation keeps context
+- **Pin** charts to a dashboard that re-runs their SQL on every load, next to a KPI strip
 - **Upload** a CSV and question it with the same safety rules
 - **Switch models**: Google Gemini by default (free tier), OpenAI and Anthropic Claude when their keys are set
+- **History**: conversations are saved, renamable and deletable; light / dark theme
 
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · Vercel AI SDK 7 ·
-Neon Postgres · Prisma 7 · Auth.js v5 · TanStack Query · Recharts · zod
+**Stack:** Next.js 16 (App Router, Cache Components) · React 19 · TypeScript · Tailwind CSS 4 ·
+Vercel AI SDK 7 · Neon Postgres · Prisma 7 · `pg` · `node-sql-parser` · Auth.js v5 ·
+TanStack Query · Recharts · zod · Vitest
 
 ---
 
@@ -30,17 +45,24 @@ Neon Postgres · Prisma 7 · Auth.js v5 · TanStack Query · Recharts · zod
 - [Tests](#tests)
 - [Deploying to Vercel](#deploying-to-vercel)
 - [Environment variables](#environment-variables)
+- [npm scripts](#npm-scripts)
+- [API routes](#api-routes)
 - [Project structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Author](#author)
 
 ---
 
 ## Quick start
 
-You need Node.js 20.9+, a free [Neon](https://neon.tech) database and a free
+You need **Node.js 22** (`package.json` pins `"node": "22.x"`), a free
+[Neon](https://neon.tech) database and a free
 [Google AI Studio](https://aistudio.google.com/apikey) API key.
 
 ```bash
-npm install
+git clone https://github.com/murtaza008/AskData-AI.git
+cd AskData-AI
+npm install            # also runs `prisma generate`
 cp .env.example .env
 ```
 
@@ -52,6 +74,12 @@ Fill in `.env`. Only four values are required:
 | `GOOGLE_GENERATIVE_AI_API_KEY` | https://aistudio.google.com/apikey |
 | `AUTH_SECRET` | `npx auth secret`, or any long random string |
 | `ANALYTICS_ROLE_PASSWORD` | any long random string (becomes the read-only role's password) |
+
+> **Important:** `.env.example` ships with *placeholder* values for `DIRECT_URL`
+> and `ANALYTICS_DATABASE_URL`. Either replace them with real connection strings
+> or set them to `""`. When they are empty, both are derived automatically from
+> `DATABASE_URL` (+ `ANALYTICS_ROLE_PASSWORD`); a leftover placeholder is used
+> as-is and the migration / read-only connection will fail.
 
 Then create everything in the database and start the app:
 
@@ -279,6 +307,11 @@ same inference code, creates a table `uploads.u_<user>_<file>` and loads the row
 - Uploads expire after 7 days (`UPLOAD_TTL_DAYS`). A daily Vercel Cron job (`vercel.json`) drops expired tables, and the list endpoint also cleans up on access
 - The agent sees a user's uploads next to the demo tables and queries them under the same safety rules
 
+**Try it with the sample file.** [`scripts/demo-data/marketing_spend.csv`](scripts/demo-data/marketing_spend.csv)
+holds ~200 rows of weekly ad spend by channel and campaign. The demo dataset has no
+marketing data, so *"How much did we spend on marketing last quarter?"* is declined
+at first; upload this file and ask again to see the agent pick up the new table.
+
 ---
 
 ## Evaluating accuracy
@@ -337,6 +370,10 @@ npm run lint
 3. Deploy. Vercel runs the `vercel-build` script, which applies migrations before building.
 4. If you have not already, run `npm run db:setup` and `npm run db:seed` once from
    your machine with the production `DATABASE_URL` in `.env`.
+5. Open `https://<your-app>.vercel.app/api/health`. It reports `ok` / `failed` /
+   `missing` for the app database, the read-only role, the demo data, `AUTH_SECRET`
+   and the AI provider, without revealing any values, so you can see at a glance
+   which piece of configuration is wrong. It returns HTTP 503 until every check passes.
 
 Notes for the free (Hobby) tier:
 
@@ -372,6 +409,49 @@ Documented in full in [`.env.example`](.env.example).
 | `UPLOAD_MAX_MB` / `UPLOAD_TTL_DAYS` | no | Upload size limit (4) and lifetime (7) |
 | `DEMO_DAILY_QUESTIONS` | no | Daily quota for the demo account (150) |
 | `CRON_SECRET` | for cron | Protects the clean-up endpoint |
+| `AUTH_URL` | no | Only needed behind a proxy or custom domain |
+
+---
+
+## npm scripts
+
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server on http://localhost:3000 |
+| `npm run build` / `npm start` | Production build (`prisma generate && next build`) and server |
+| `npm run vercel-build` | Build used on Vercel: also applies migrations (`prisma migrate deploy`) |
+| `npm run db:init` | `db:migrate` → `db:setup` → `db:seed` in one go |
+| `npm run db:migrate` | Apply Prisma migrations (the `app` schema) |
+| `npm run db:setup` | Create and verify the read-only role and the `analytics` / `uploads` schemas |
+| `npm run db:seed` | (Re)build the demo dataset and the demo account |
+| `npm run eval` | Accuracy eval against the live agent (uses your AI quota) |
+| `npm test` | Unit tests (Vitest), no database or API key needed |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint |
+
+---
+
+## API routes
+
+Every route except `/api/health`, `/api/register` and the cron endpoint requires a
+signed-in session, and every query is scoped to the caller's user id.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/chat` | Run the agent for one question; streams NDJSON (`start` → `step`… → `answer`) |
+| `GET` | `/api/conversations` | List the user's conversations |
+| `GET` `PATCH` `DELETE` | `/api/conversations/[id]` | Read, rename or delete a conversation |
+| `GET` `POST` | `/api/pins` | List pinned charts / pin an answer to the dashboard |
+| `DELETE` | `/api/pins/[id]` | Unpin a chart |
+| `GET` | `/api/pins/[id]/data` | Re-run a pinned chart's SQL through the safety pipeline |
+| `GET` | `/api/overview` | Dashboard KPIs (revenue, orders, AOV, repeat rate vs. previous period) |
+| `GET` `POST` | `/api/uploads` | List uploads / upload a CSV (multipart) |
+| `DELETE` | `/api/uploads/[id]` | Drop an uploaded table |
+| `GET` | `/api/datasource` | Tables the agent can see for this user |
+| `GET` | `/api/models` | Models whose provider key is configured, plus the default |
+| `POST` | `/api/register` | Create an account |
+| `GET` | `/api/cron/cleanup-uploads` | Drop expired uploads (`Authorization: Bearer $CRON_SECRET`) |
+| `GET` | `/api/health` | Deployment self-check |
 
 ---
 
@@ -407,4 +487,25 @@ src/
   lib/                   Isomorphic helpers: types, chart logic, formatting, CSV, validation
 ```
 
-Before publishing, set your name and repository link in [`src/lib/site.ts`](src/lib/site.ts).
+The footer's author name and repository link come from [`src/lib/site.ts`](src/lib/site.ts);
+change them there if you fork the project.
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| `db:migrate` or `db:setup` cannot connect | `DIRECT_URL` still holds the `.env.example` placeholder. Set it to `""` or to the non-pooled Neon string |
+| Every question fails with a permission or login error | `ANALYTICS_ROLE_PASSWORD` differs from the one `db:setup` used, or `ANALYTICS_DATABASE_URL` is a leftover placeholder. Re-run `npm run db:setup` (it re-syncs the password) |
+| "No AI provider is configured" | No provider key is set. Add `GOOGLE_GENERATIVE_AI_API_KEY` (or an OpenAI / Anthropic key) |
+| "rate limit was reached" / "high demand" | Gemini free-tier limits. Wait a minute, or switch model in the sidebar picker |
+| Dashboard shows no data | The demo dataset is missing. Run `npm run db:seed` |
+| `/api/health` returns 503 | Read which check is not `ok`; the function logs on Vercel show the underlying error |
+
+---
+
+## Author
+
+Built by **Murtaza Mazhar** — [GitHub @murtaza008](https://github.com/murtaza008) ·
+[Repository](https://github.com/murtaza008/AskData-AI) · [Live demo](https://ask-data-ai-ten.vercel.app/)
