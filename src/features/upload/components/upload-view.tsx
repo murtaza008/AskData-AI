@@ -18,7 +18,8 @@ export function UploadView() {
   const createUpload = useCreateUpload();
 
   const list = uploads.data?.uploads ?? [];
-  const atLimit = limits !== undefined && list.length >= limits.maxTables;
+  // The demo account's sample file does not count towards the limit.
+  const atLimit = limits !== undefined && list.filter((upload) => !upload.isSample).length >= limits.maxTables;
 
   const confirm = () => {
     if (!preview) return;

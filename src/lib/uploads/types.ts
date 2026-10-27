@@ -21,6 +21,8 @@ export type UploadDTO = {
   sizeBytes: number;
   createdAt: string;
   expiresAt: string;
+  /** Preloaded sample file of the demo account: permanent and not deletable. */
+  isSample: boolean;
 };
 
 export type UploadLimits = {

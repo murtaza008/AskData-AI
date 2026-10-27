@@ -93,6 +93,10 @@ model Upload {
   sizeBytes    Int
   createdAt    DateTime @default(now())
   expiresAt    DateTime
+  /// A sample file loaded by `npm run db:seed` for the shared demo account.
+  /// It never expires, cannot be deleted from the UI and does not count
+  /// towards the per-user upload limit.
+  isSample     Boolean  @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

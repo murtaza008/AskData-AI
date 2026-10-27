@@ -8,7 +8,7 @@ import { type AllowedTable, validateSelect, withRowLimit } from "./validate";
 /** Schema holding the demo e-commerce dataset. */
 export const ANALYTICS_SCHEMA = "analytics";
 /** Schema holding per-user CSV uploads. */
-export const UPLOADS_SCHEMA = "uploads";
+export { UPLOADS_SCHEMA } from "@/server/uploads/csv-table";
 
 /** The query was refused before reaching the database. */
 export class QueryRejectedError extends Error {

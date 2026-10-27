@@ -307,10 +307,13 @@ same inference code, creates a table `uploads.u_<user>_<file>` and loads the row
 - Uploads expire after 7 days (`UPLOAD_TTL_DAYS`). A daily Vercel Cron job (`vercel.json`) drops expired tables, and the list endpoint also cleans up on access
 - The agent sees a user's uploads next to the demo tables and queries them under the same safety rules
 
-**Try it with the sample file.** [`scripts/demo-data/marketing_spend.csv`](scripts/demo-data/marketing_spend.csv)
-holds ~200 rows of weekly ad spend by channel and campaign. The demo dataset has no
-marketing data, so *"How much did we spend on marketing last quarter?"* is declined
-at first; upload this file and ask again to see the agent pick up the new table.
+**Sample file.** [`scripts/demo-data/marketing_spend.csv`](scripts/demo-data/marketing_spend.csv)
+holds ~200 rows of weekly ad spend by channel and campaign. `npm run db:seed` loads it
+into the **demo account** as a permanent sample upload (it never expires, can't be
+deleted from the UI, doesn't count towards the 5-table limit, and its dates are shifted
+so the latest week is last week). That is why *"How much did we spend on marketing last
+quarter?"* works in the demo. On your own account the question is declined until you
+upload the file yourself, which shows the agent picking up a new table.
 
 ---
 

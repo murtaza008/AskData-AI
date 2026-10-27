@@ -12,6 +12,9 @@ import { useDeleteUpload } from "../hooks/use-uploads";
 
 /** A ready-made first question about an uploaded table. */
 function starterQuestion(upload: UploadDTO): string {
+  if (upload.isSample && upload.originalName === "marketing_spend.csv") {
+    return "How much did we spend on marketing last quarter, by channel?";
+  }
   return `Summarize the table ${upload.tableName}: how many rows are there and what are the key figures?`;
 }
 
@@ -34,13 +37,20 @@ export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
       {uploads.map((upload) => (
         <li key={upload.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <div className="truncate font-medium">{upload.originalName}</div>
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="truncate font-medium">{upload.originalName}</span>
+              {upload.isSample && (
+                <span className="shrink-0 rounded-sm border px-1.5 text-[11px] text-highlight">Sample</span>
+              )}
+            </div>
             <div className="num mt-0.5 truncate text-[12px] text-muted-foreground">
               {upload.tableName} · {formatCount(upload.rowCount)} rows · {upload.columns.length} columns ·{" "}
               {formatBytes(upload.sizeBytes)}
             </div>
             <div className="mt-0.5 text-[12px] text-muted-foreground">
-              Deleted automatically {formatRelative(upload.expiresAt)}
+              {upload.isSample
+                ? "Included with the demo account · always available"
+                : `Deleted automatically ${formatRelative(upload.expiresAt)}`}
             </div>
           </div>
           <Link
@@ -50,14 +60,16 @@ export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
             <MessageSquare className="size-3.5" strokeWidth={1.5} />
             Ask about it
           </Link>
-          <IconButton
-            label={`Delete ${upload.originalName}`}
-            onClick={() => remove(upload)}
-            disabled={deleteUpload.isPending}
-            className="hover:text-destructive"
-          >
-            <Trash2 className="size-4" strokeWidth={1.5} />
-          </IconButton>
+          {!upload.isSample && (
+            <IconButton
+              label={`Delete ${upload.originalName}`}
+              onClick={() => remove(upload)}
+              disabled={deleteUpload.isPending}
+              className="hover:text-destructive"
+            >
+              <Trash2 className="size-4" strokeWidth={1.5} />
+            </IconButton>
+          )}
         </li>
       ))}
     </ul>
