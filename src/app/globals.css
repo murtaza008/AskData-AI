@@ -438,3 +438,78 @@ html[data-theme-switching]::view-transition-new(root) {
     animation: none !important;
   }
 }
+
+/* ---------- landing ---------- */
+
+/* Headline words rise in one by one (spaces live outside the spans). */
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+}
+.hero-word {
+  display: inline-block;
+  animation: word-in 560ms var(--ease-out-expo) both;
+  animation-delay: calc(80ms + var(--i, 0) * 45ms);
+}
+
+/* The landing header gains a surface and border once the page scrolls (no JS). */
+@keyframes header-solid {
+  to {
+    background-color: var(--surface);
+    border-bottom-color: var(--border);
+  }
+}
+.site-header {
+  background-color: var(--bg);
+}
+@supports (animation-timeline: scroll()) {
+  .site-header {
+    animation: header-solid linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 80px;
+  }
+}
+
+/* ---------- charts ---------- */
+
+/* Lines draw in from the left (paths use pathLength="1"). */
+@keyframes chart-draw {
+  from {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+}
+.chart-draw {
+  animation: chart-draw 900ms var(--ease-out-expo) both;
+}
+.chart-fade {
+  animation: fade-in 450ms var(--ease-out-expo) 200ms both;
+}
+
+/* Bars grow from their baseline, staggered (capped at 15). */
+@keyframes bar-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes bar-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+.bar-grow-x {
+  transform-origin: left center;
+  animation: bar-grow-x 560ms var(--ease-out-expo) both;
+  animation-delay: calc(min(var(--i, 0), 15) * 35ms);
+}
+.bar-grow-y {
+  transform-box: view-box;
+  animation: bar-grow-y 560ms var(--ease-out-expo) both;
+  animation-delay: calc(min(var(--i, 0), 15) * 25ms);
+}

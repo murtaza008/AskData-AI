@@ -92,4 +92,5 @@ export async function expectPage(page: Page, label: string) {
     page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: label, exact: true }),
   ).toHaveAttribute("aria-current", "page", { timeout: 30_000 });
   await expect(page.locator("main h1").first()).toBeVisible({ timeout: 20_000 });
+  await page.locator("html[data-shell-ready]").waitFor({ state: "attached", timeout: 20_000 });
 }

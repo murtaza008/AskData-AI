@@ -40,7 +40,15 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteUsed, setPaletteUsed] = useState(false);
 
-  useEffect(() => installPressFeedback(), []);
+  useEffect(() => {
+    const uninstall = installPressFeedback();
+    // Marks the shell as interactive (keyboard shortcuts are live); e2e tests wait for it.
+    document.documentElement.dataset.shellReady = "";
+    return () => {
+      uninstall();
+      delete document.documentElement.dataset.shellReady;
+    };
+  }, []);
 
   // After sign-in, once the browser is idle: warm every page's code and the palette chunk.
   useEffect(() => {

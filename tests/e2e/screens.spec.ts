@@ -93,3 +93,76 @@ test("review mid-animation frame", async ({ page }) => {
   mkdirSync(dir, { recursive: true });
   await page.screenshot({ path: path.join(dir, "mid-animation.png") });
 });
+
+/** README and landing-page screenshots (npm run screens): real pages, demo account, both themes. */
+test.describe("marketing", () => {
+  test.skip(process.env.SCREENS !== "marketing", "run with SCREENS=marketing");
+  const out = "public/screens";
+
+  for (const theme of themes) {
+    test(`marketing ${theme}`, async ({ page }) => {
+      await mockChat(page);
+      await setTheme(page, theme);
+      mkdirSync(out, { recursive: true });
+
+      await page.goto("/app/history");
+      await page.getByRole("link", { name: "What were our top 5 products by revenue last month?" }).click();
+      await expect(page.getByRole("table").first()).toBeVisible({ timeout: 30_000 });
+      await page.waitForLoadState("networkidle");
+      await settle(page);
+      await page.screenshot({ path: path.join(out, `answer-${theme}.png`) });
+
+      await page.goto("/app/dashboard");
+      await page.waitForLoadState("networkidle");
+      await settle(page);
+      await page.screenshot({ path: path.join(out, `dashboard-${theme}.png`) });
+
+      await page.goto("/app/upload");
+      await page.waitForLoadState("networkidle");
+      await settle(page);
+      await page.screenshot({ path: path.join(out, `data-${theme}.png`) });
+    });
+  }
+});
+
+for (const theme of themes) {
+  test(`review landing ${theme}`, async ({ page }) => {
+    test.skip(Boolean(only && !only.includes("landing")));
+    await setTheme(page, theme, { reducedMotion: false });
+    await page.goto("/");
+    await page.waitForTimeout(900);
+    await shot(page, `landing-hero-${theme}`);
+    const story = page.locator("[data-story]");
+    const box = await story.boundingBox();
+    const top = (box?.y ?? 0) + (await page.evaluate(() => window.scrollY));
+    const span = (box?.height ?? 0) - 900;
+    for (const stage of [0, 1, 2, 2.5, 3, 4]) {
+      await page.evaluate((y) => window.scrollTo(0, y), top + (span * stage) / 4);
+      await page.waitForTimeout(1600);
+      await page.screenshot({ path: path.join(dir, `landing-story-${stage}-${theme}.png`) });
+    }
+    for (const id of ["demos", "safety", "screens", "questions"]) {
+      await page.evaluate((target) => document.getElementById(target)?.scrollIntoView(), id);
+      await page.waitForTimeout(900);
+      await page.screenshot({ path: path.join(dir, `landing-${id}-${theme}.png`) });
+    }
+  });
+}
+
+test("review landing mobile", async ({ browser }) => {
+  test.skip(Boolean(only && !only.includes("landing")));
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  const page = await context.newPage();
+  await page.goto("/");
+  await page.waitForTimeout(900);
+  mkdirSync(dir, { recursive: true });
+  await page.screenshot({ path: path.join(dir, "landing-mobile-hero.png") });
+  await page.evaluate(() => document.getElementById("how")?.scrollIntoView());
+  await page.mouse.wheel(0, 1400);
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: path.join(dir, "landing-mobile-story.png") });
+  await page.evaluate(() => document.getElementById("demos")?.scrollIntoView());
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: path.join(dir, "landing-mobile-demos.png") });
+  await context.close();
+});
