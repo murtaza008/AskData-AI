@@ -49,3 +49,4 @@ next-env.d.ts
 /tests/e2e/.results/
 /playwright-report/
 /test-results/
+/.next-build.log

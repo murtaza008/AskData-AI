@@ -5,7 +5,16 @@ import { ApiError } from "@/server/http";
 
 /** Every query here is scoped by `userId` — a user can only ever reach their own rows. */
 
-export type ConversationSummary = { id: string; title: string; updatedAt: string };
+export type ConversationSummary = {
+  id: string;
+  title: string;
+  updatedAt: string;
+  /** Questions asked in the conversation. */
+  turns: number;
+  /** Start of the latest answer's insight, for the history hover preview (no extra request). */
+  lastInsight: string | null;
+  lastChartType: string | null;
+};
 
 const TITLE_MAX = 70;
 
@@ -14,14 +23,37 @@ function titleFrom(question: string): string {
   return clean.length > TITLE_MAX ? `${clean.slice(0, TITLE_MAX - 1).trimEnd()}…` : clean;
 }
 
+type SummaryRow = {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  turns: number;
+  lastInsight: string | null;
+  lastChartType: string | null;
+};
+
 export async function listConversations(userId: string): Promise<ConversationSummary[]> {
-  const rows = await prisma.conversation.findMany({
-    where: { userId },
-    orderBy: { updatedAt: "desc" },
-    take: 60,
-    select: { id: true, title: true, updatedAt: true },
-  });
-  return rows.map((row) => ({ id: row.id, title: row.title, updatedAt: row.updatedAt.toISOString() }));
+  // Only short fields from the latest turn's JSON, never its result rows.
+  const rows = await prisma.$queryRaw<SummaryRow[]>`
+    SELECT c.id, c.title, c."updatedAt",
+           (SELECT count(*)::int FROM app."Turn" t WHERE t."conversationId" = c.id) AS turns,
+           last.insight AS "lastInsight", last.chart_type AS "lastChartType"
+    FROM app."Conversation" c
+    LEFT JOIN LATERAL (
+      SELECT left(t.answer->>'insight', 240) AS insight, t.answer->'chart'->>'type' AS chart_type
+      FROM app."Turn" t WHERE t."conversationId" = c.id ORDER BY t."createdAt" DESC LIMIT 1
+    ) last ON true
+    WHERE c."userId" = ${userId}
+    ORDER BY c."updatedAt" DESC
+    LIMIT 60`;
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    updatedAt: new Date(row.updatedAt).toISOString(),
+    turns: Number(row.turns),
+    lastInsight: row.lastInsight,
+    lastChartType: row.lastChartType,
+  }));
 }
 
 export async function getConversation(userId: string, id: string) {

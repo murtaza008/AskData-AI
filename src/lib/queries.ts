@@ -3,6 +3,7 @@ import type { AccountDTO } from "@/lib/account";
 import type { ChartSpec, QueryResult, TurnDTO } from "@/lib/agent/types";
 import { api } from "@/lib/api-client";
 import type { ModelsResponse } from "@/lib/models";
+import type { OverviewDTO, PeriodDays } from "@/lib/overview";
 import { queryKeys } from "@/lib/query-keys";
 import type { UploadsResponse } from "@/lib/uploads/types";
 
@@ -13,20 +14,20 @@ import type { UploadsResponse } from "@/lib/uploads/types";
  * Nothing here ever calls the AI (/api/chat is a POST stream, never prefetched).
  */
 
-export type ConversationSummary = { id: string; title: string; updatedAt: string };
+export type ConversationSummary = {
+  id: string;
+  title: string;
+  updatedAt: string;
+  turns: number;
+  lastInsight: string | null;
+  lastChartType: string | null;
+};
 export type ConversationDetail = { id: string; title: string; turns: TurnDTO[] };
 
 export type Pin = { id: string; title: string; question: string; sql: string; chart: ChartSpec; createdAt: string };
 export type PinData = QueryResult & { chart: ChartSpec; refreshedAt: string };
 
-export type Kpi = {
-  key: string;
-  label: string;
-  value: number;
-  previous: number;
-  format: "currency" | "number" | "percent";
-};
-export type Overview = { kpis: Kpi[]; periodLabel: string };
+export type { OverviewDTO as Overview, OverviewKpi as Kpi } from "@/lib/overview";
 
 export type DataSourceTable = { name: string; rowCount: number; columnCount: number; isUpload: boolean };
 
@@ -44,8 +45,12 @@ export const q = {
       queryFn: () => api<{ pins: Pin[] }>("/api/pins"),
       select: (data) => data.pins,
     }),
-  overview: () =>
-    queryOptions({ queryKey: queryKeys.overview, queryFn: () => api<Overview>("/api/overview"), staleTime: 60_000 }),
+  overview: (days: PeriodDays = 30) =>
+    queryOptions({
+      queryKey: [...queryKeys.overview, days],
+      queryFn: () => api<OverviewDTO>(`/api/overview?days=${days}`),
+      staleTime: 5 * 60_000,
+    }),
   uploads: () => queryOptions({ queryKey: queryKeys.uploads, queryFn: () => api<UploadsResponse>("/api/uploads") }),
   dataSource: () =>
     queryOptions({

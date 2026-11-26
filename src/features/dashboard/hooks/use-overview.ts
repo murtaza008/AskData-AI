@@ -1,11 +1,13 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { PeriodDays } from "@/lib/overview";
 import { q } from "@/lib/queries";
 
 export type { Kpi, Overview } from "@/lib/queries";
 
-/** Headline KPIs for the dashboard (last 30 days vs the 30 before). */
-export function useOverview() {
-  return useQuery(q.overview());
+/** Dashboard figures for the last `days` days of data, compared with the days before. */
+export function useOverview(days: PeriodDays = 30) {
+  // Keep showing the previous period's numbers while a new period loads, so they count to the new values.
+  return useQuery({ ...q.overview(days), placeholderData: keepPreviousData });
 }

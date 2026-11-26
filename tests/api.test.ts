@@ -17,6 +17,12 @@ vi.mock("@/server/auth/auth", () => ({
 const conversations = [{ id: "c1", userId: "u1", title: "Revenue by region" }];
 const pins = [{ id: "p1", userId: "u1" }];
 const turnCount = vi.fn(async () => 7);
+const queryRaw = vi.fn(async (strings: TemplateStringsArray, values: unknown[]) => {
+  void strings;
+  return values[0] === "u1"
+    ? [{ id: "c1", title: "Revenue by region", updatedAt: new Date("2026-10-20T10:00:00Z"), turns: 2, lastInsight: "North America led.", lastChartType: "bar" }]
+    : [];
+});
 
 function scoped<T extends { id: string; userId: string }>(rows: T[]) {
   return async ({ where }: { where: { id: string; userId: string } }) => ({
@@ -26,6 +32,7 @@ function scoped<T extends { id: string; userId: string }>(rows: T[]) {
 
 vi.mock("@/server/db/prisma", () => ({
   prisma: {
+    $queryRaw: (strings: TemplateStringsArray, ...values: unknown[]) => queryRaw(strings, values),
     turn: { count: (...args: unknown[]) => turnCount(...(args as [])) },
     conversation: { updateMany: scoped(conversations), deleteMany: scoped(conversations) },
     pinnedChart: { deleteMany: scoped(pins) },
@@ -36,6 +43,7 @@ const deleteUpload = vi.fn(async () => undefined);
 vi.mock("@/server/services/uploads", () => ({ deleteUpload: (...args: unknown[]) => deleteUpload(...(args as [])) }));
 
 const me = await import("@/app/api/me/route");
+const conversationList = await import("@/app/api/conversations/route");
 const conversation = await import("@/app/api/conversations/[id]/route");
 const pin = await import("@/app/api/pins/[id]/route");
 const upload = await import("@/app/api/uploads/[id]/route");
@@ -143,5 +151,29 @@ describe("DELETE routes", () => {
     expect((await pin.DELETE(del(), params("p1"))).status).toBe(200);
     expect((await upload.DELETE(del(), params("x1"))).status).toBe(200);
     expect(deleteUpload).toHaveBeenCalledWith("u1", "x1");
+  });
+});
+
+describe("GET /api/conversations", () => {
+  it("is 401 when signed out", async () => {
+    expect((await conversationList.GET()).status).toBe(401);
+    expect(queryRaw).not.toHaveBeenCalled();
+  });
+
+  it("lists only the caller's conversations, with a short preview of the latest answer", async () => {
+    sessionUser = owner;
+    const body = await (await conversationList.GET()).json();
+    expect(queryRaw).toHaveBeenCalledTimes(1);
+    expect(queryRaw.mock.calls[0][1]).toEqual(["u1"]);
+    expect(queryRaw.mock.calls[0][0].join("?")).toContain('WHERE c."userId" = ?');
+    expect(body.conversations).toEqual([
+      { id: "c1", title: "Revenue by region", updatedAt: "2026-10-20T10:00:00.000Z", turns: 2, lastInsight: "North America led.", lastChartType: "bar" },
+    ]);
+  });
+
+  it("returns nothing of another user's", async () => {
+    sessionUser = other;
+    const body = await (await conversationList.GET()).json();
+    expect(body.conversations).toEqual([]);
   });
 });
