@@ -1,36 +1,58 @@
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
-import { DataChart } from "@/components/charts/data-chart";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { Reveal } from "@/components/motion/reveal";
-import { SAMPLE_TREND } from "@/features/marketing/sample-data";
+import { formatInt, LANDING, totalOrders } from "@/features/landing/data";
 
-/** Two-column frame for the login and sign-up pages. */
+/**
+ * Frame for the login and sign-up pages: a top bar, one centred column, and
+ * underneath it the three facts a visitor most needs before trying a data
+ * tool with an AI in it. All three are true as implemented.
+ */
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-2">
-      <div className="flex flex-col px-6 py-6 sm:px-12 sm:py-8">
-        <div className="flex items-center justify-between">
+    <div className="flex min-h-dvh flex-col">
+      <header className="border-b bg-surface">
+        <div className="mx-auto flex h-14 max-w-[1120px] items-center justify-between gap-4 px-4 sm:px-6">
           <Wordmark />
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <Link href="/" className="hidden items-center gap-1.5 rounded-sm px-2 py-1 text-[13px] text-fg-muted hover:text-fg sm:inline-flex">
+              <ArrowLeft aria-hidden className="size-3.5" />
+              Back to the site
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
-        <div className="mx-auto flex w-full max-w-[380px] flex-1 flex-col justify-center py-10">
-          <Reveal y={10}>{children}</Reveal>
-        </div>
-      </div>
+      </header>
 
-      <aside className="hidden border-l bg-sunken lg:flex lg:flex-col lg:justify-center lg:px-16">
-        <div className="eyebrow">Sample answer · monthly revenue</div>
-        <p className="mt-3 max-w-[40ch] font-display text-[26px] leading-[1.2]">
-          “How has monthly revenue trended over the last 12 months?”
-        </p>
-        <Reveal delay={0.15} y={18} className="mt-8 rounded-lg border bg-surface p-4 shadow-[var(--shadow-md)]">
-          <DataChart spec={SAMPLE_TREND.spec} rows={SAMPLE_TREND.rows} height={260} />
-        </Reveal>
-        <p className="mt-4 max-w-[46ch] text-[13px] text-fg-muted">
-          Every answer comes with the chart, the rows behind it, and the exact read-only SQL that produced them.
-        </p>
-      </aside>
+      <main className="relative flex flex-1 justify-center overflow-hidden px-4 py-10 sm:py-16">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(var(--border)_1px,transparent_1px)] bg-[size:100%_44px] opacity-35 [mask-image:linear-gradient(to_bottom,black,transparent_70%)]"
+        />
+        <div className="animate-rise relative w-full max-w-[440px]">{children}</div>
+      </main>
+
+      <footer className="border-t bg-surface-2">
+        <dl className="mx-auto grid max-w-[1120px] grid-cols-1 gap-4 px-4 py-6 text-[13px] sm:grid-cols-3 sm:px-6">
+          <div>
+            <dt className="eyebrow">What it can reach</dt>
+            <dd className="mt-1 text-fg-muted">
+              A read-only role on the demo store ({LANDING.tables.length} tables, {formatInt(totalOrders)} orders) and your own CSV
+              uploads.
+            </dd>
+          </div>
+          <div>
+            <dt className="eyebrow">What it can run</dt>
+            <dd className="mt-1 text-fg-muted">One parsed and checked SELECT at a time, stopped after 5 seconds, capped at 500 rows.</dd>
+          </div>
+          <div>
+            <dt className="eyebrow">What you see</dt>
+            <dd className="mt-1 text-fg-muted">The answer, the chart, the rows and the exact SQL behind every number.</dd>
+          </div>
+        </dl>
+      </footer>
     </div>
   );
 }

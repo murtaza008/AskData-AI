@@ -29,3 +29,25 @@ test.describe("mobile (390 px)", () => {
     });
   }
 });
+
+test("a 'Try the demo' link puts focus on the one-click demo sign-in", async ({ page }) => {
+  await setTheme(page, "light");
+  await page.goto("/login?demo=1");
+  await expect(page.getByRole("button", { name: "Continue with the demo account" })).toBeFocused();
+});
+
+test("a wrong password shows a readable error", async ({ page }) => {
+  await setTheme(page, "light");
+  await page.goto("/login");
+  await page.getByLabel("Email").fill("nobody@example.com");
+  await page.getByLabel("Password").fill("not-the-password");
+  await page.getByRole("button", { name: "Log in", exact: true }).click();
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("don't match an account");
+});
+
+test("sign-up validates before sending anything", async ({ page }) => {
+  await setTheme(page, "light");
+  await page.goto("/signup");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.getByText(/at least 8 characters|Enter your name|valid email/i).first()).toBeVisible();
+});

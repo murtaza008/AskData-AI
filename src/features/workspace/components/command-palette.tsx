@@ -12,6 +12,7 @@ import {
   Pin,
   Plus,
   Search,
+  Settings,
   Sun,
   Table2,
 } from "lucide-react";
@@ -109,6 +110,7 @@ export default function CommandPalette({ open, onOpenChange }: { open: boolean; 
       })),
       { id: "new", group: "Actions", label: "New question", icon: Plus, keywords: "ask chat start", run: go("/app") },
       { id: "upload", group: "Actions", label: "Upload a CSV", icon: FileUp, keywords: "import file data", run: go("/app/upload") },
+      { id: "settings", group: "Actions", label: "Settings", icon: Settings, keywords: "account preferences model theme", run: go("/app/settings") },
       { id: "light", group: "Actions", label: "Use light theme", icon: Sun, keywords: "appearance", run: () => switchTheme("light", setTheme) },
       { id: "dark", group: "Actions", label: "Use dark theme", icon: Moon, keywords: "appearance", run: () => switchTheme("dark", setTheme) },
       { id: "system", group: "Actions", label: "Use system theme", icon: Monitor, keywords: "appearance", run: () => switchTheme("system", setTheme) },

@@ -29,7 +29,15 @@ export type PinData = QueryResult & { chart: ChartSpec; refreshedAt: string };
 
 export type { OverviewDTO as Overview, OverviewKpi as Kpi } from "@/lib/overview";
 
-export type DataSourceTable = { name: string; rowCount: number; columnCount: number; isUpload: boolean };
+export type DataSourceColumn = { name: string; type: string; comment: string | null; isKey: boolean };
+export type DataSourceTable = {
+  name: string;
+  rowCount: number;
+  columnCount: number;
+  isUpload: boolean;
+  comment: string | null;
+  columns: DataSourceColumn[];
+};
 
 export const q = {
   me: () => queryOptions({ queryKey: ["me"], queryFn: () => api<AccountDTO>("/api/me"), staleTime: 30_000 }),

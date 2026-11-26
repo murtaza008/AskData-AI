@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { buttonClass } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { messageOf } from "@/lib/api-client";
+import { useAccount } from "@/lib/hooks/use-account";
 import { formatBytes, formatCount, formatRelative } from "@/lib/format";
 import type { UploadDTO } from "@/lib/uploads/types";
 import { useDeleteUpload } from "../hooks/use-uploads";
@@ -21,6 +22,7 @@ function starterQuestion(upload: UploadDTO): string {
 /** The user's uploaded tables, with expiry, a starter question, and delete. */
 export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
   const deleteUpload = useDeleteUpload();
+  const { isDemo } = useAccount();
 
   const remove = (upload: UploadDTO) =>
     deleteUpload.mutate(upload.id, {
@@ -29,11 +31,12 @@ export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
     });
 
   if (uploads.length === 0) {
-    return <p className="text-[14px] text-fg-muted">No uploaded tables yet.</p>;
+    return <p className="text-[14px] text-fg-muted">No uploaded files yet. Add a CSV above and ask about it.</p>;
   }
 
   return (
-    <ul className="divide-y rounded-lg border bg-surface">
+    <>
+    <ul className="panel divide-y overflow-hidden">
       {uploads.map((upload) => (
         <li key={upload.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <div className="min-w-0 flex-1">
@@ -60,7 +63,7 @@ export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
             <MessageSquare className="size-3.5" strokeWidth={1.5} />
             Ask about it
           </Link>
-          {!upload.isSample && (
+          {!upload.isSample && !isDemo && (
             <IconButton
               label={`Delete ${upload.originalName}`}
               onClick={() => remove(upload)}
@@ -73,5 +76,11 @@ export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
         </li>
       ))}
     </ul>
+    {isDemo && uploads.some((upload) => !upload.isSample) && (
+      <p className="mt-2 text-[12.5px] text-fg-muted">
+        Files added to the shared demo account can&apos;t be deleted by hand; they are removed automatically when they expire.
+      </p>
+    )}
+    </>
   );
 }

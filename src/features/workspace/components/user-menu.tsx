@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { FileUp, History, LogOut } from "lucide-react";
+import { FileUp, History, LogOut, Settings } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Menu, MenuContent, MenuItem, MenuSeparator, MenuTrigger } from "@/components/ui/menu";
@@ -49,6 +49,9 @@ export function UserMenu() {
         </MenuItem>
         <MenuItem onSelect={() => router.push("/app/upload")}>
           <FileUp aria-hidden /> Upload a CSV
+        </MenuItem>
+        <MenuItem onSelect={() => router.push("/app/settings")}>
+          <Settings aria-hidden /> Settings
         </MenuItem>
         <MenuSeparator />
         <MenuItem onSelect={() => void signOut({ redirectTo: "/" })}>

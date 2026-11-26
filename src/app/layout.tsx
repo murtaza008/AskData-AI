@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import type { ReactNode } from "react";
-import { MotionProvider } from "@/components/motion/reveal";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 
@@ -52,9 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       {/* Browser extensions (Grammarly, password managers) add attributes to
           <body> before React hydrates; this silences that harmless mismatch. */}
       <body suppressHydrationWarning>
-        <ThemeProvider>
-          <MotionProvider>{children}</MotionProvider>
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

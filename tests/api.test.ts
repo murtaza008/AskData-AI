@@ -42,7 +42,28 @@ vi.mock("@/server/db/pools", () => ({ analyticsPool: () => ({}), ownerPool: () =
 const deleteUpload = vi.fn(async () => undefined);
 vi.mock("@/server/services/uploads", () => ({ deleteUpload: (...args: unknown[]) => deleteUpload(...(args as [])) }));
 
+const getDataSource = vi.fn(async (userId: string) => ({
+  allowed: [],
+  tables: [
+    {
+      schema: "analytics",
+      name: "orders",
+      comment: "One row per order.",
+      rowCount: 9382,
+      columns: [
+        { name: "id", dataType: "integer", nullable: false, isPrimaryKey: true, references: null, comment: null, samples: [], samplesComplete: false, min: "1", max: "9382" },
+        { name: "status", dataType: "text", nullable: false, isPrimaryKey: false, references: null, comment: "completed, shipped, cancelled or refunded.", samples: ["completed", "secret-sample"], samplesComplete: true, min: null, max: null },
+      ],
+    },
+    ...(userId === "u1"
+      ? [{ schema: "uploads", name: "u_u1_spend", comment: "CSV uploaded by the user.", rowCount: 3, columns: [] }]
+      : []),
+  ],
+}));
+vi.mock("@/server/sql/schema", () => ({ getDataSource: (userId: string) => getDataSource(userId) }));
+
 const me = await import("@/app/api/me/route");
+const datasource = await import("@/app/api/datasource/route");
 const conversationList = await import("@/app/api/conversations/route");
 const conversation = await import("@/app/api/conversations/[id]/route");
 const pin = await import("@/app/api/pins/[id]/route");
@@ -175,5 +196,31 @@ describe("GET /api/conversations", () => {
     sessionUser = other;
     const body = await (await conversationList.GET()).json();
     expect(body.conversations).toEqual([]);
+  });
+});
+
+describe("GET /api/datasource", () => {
+  it("is 401 when signed out", async () => {
+    expect((await datasource.GET()).status).toBe(401);
+    expect(getDataSource).not.toHaveBeenCalled();
+  });
+
+  it("lists the caller's tables with columns and notes, but no sample values", async () => {
+    sessionUser = owner;
+    const body = await (await datasource.GET()).json();
+    expect(getDataSource).toHaveBeenCalledWith("u1");
+    expect(body.tables.map((t: { name: string }) => t.name)).toEqual(["orders", "uploads.u_u1_spend"]);
+    expect(body.tables[0].columns).toEqual([
+      { name: "id", type: "integer", comment: null, isKey: true },
+      { name: "status", type: "text", comment: "completed, shipped, cancelled or refunded.", isKey: false },
+    ]);
+    expect(JSON.stringify(body)).not.toContain("secret-sample");
+  });
+
+  it("never includes another user's uploads", async () => {
+    sessionUser = other;
+    const body = await (await datasource.GET()).json();
+    expect(getDataSource).toHaveBeenCalledWith("u2");
+    expect(body.tables.some((t: { isUpload: boolean }) => t.isUpload)).toBe(false);
   });
 });

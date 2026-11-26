@@ -176,7 +176,7 @@ test("review ask flow", async ({ page }) => {
     await expect(page.getByRole("region", { name: /^Result:/ }).first()).toBeVisible({ timeout: 30_000 });
     await page.waitForLoadState("networkidle");
     await shot(page, `conversation-${theme}`);
-    await page.getByRole("button", { name: /queries ·/ }).first().click();
+    await page.getByRole("button", { name: /quer(y|ies) ·/ }).first().click();
     await page.getByRole("button", { name: "SQL that ran" }).first().click();
     await shot(page, `conversation-open-${theme}`);
   }
@@ -187,3 +187,26 @@ test("review ask flow", async ({ page }) => {
   await page.waitForTimeout(500);
   await shot(page, "ask-pending-dark");
 });
+
+for (const theme of themes) {
+  test(`review public pages ${theme}`, async ({ browser }) => {
+    test.skip(Boolean(only && !only.includes("public")));
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, storageState: { cookies: [], origins: [] } });
+    const page = await context.newPage();
+    await setTheme(page, theme);
+    for (const [name, url] of [["login", "/login?demo=1"], ["signup", "/signup"], ["404", "/nope"]] as const) {
+      await page.goto(url);
+      await page.waitForLoadState("networkidle");
+      await shot(page, `${name}-${theme}`);
+    }
+    await context.close();
+  });
+
+  test(`review settings ${theme}`, async ({ page }) => {
+    test.skip(Boolean(only && !only.includes("settings")));
+    await setTheme(page, theme);
+    await page.goto("/app/settings");
+    await page.waitForLoadState("networkidle");
+    await shot(page, `settings-${theme}`);
+  });
+}

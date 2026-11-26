@@ -55,11 +55,11 @@ export function SignupForm() {
   return (
     <>
       <h1 className="text-[28px]">Create an account</h1>
-      <p className="mt-1 text-[14px] text-fg-muted">
-        Free. You get your own conversations, dashboard and CSV uploads.
+      <p className="mt-1.5 text-[14.5px] text-fg-muted">
+        Free. You get your own conversations and dashboard, and up to 5 CSV uploads (each kept for 7 days).
       </p>
 
-      <form className="mt-6 space-y-4" onSubmit={onSubmit} noValidate>
+      <form className="panel mt-6 space-y-4 p-5" onSubmit={onSubmit} noValidate>
         <TextField label="Name" name="name" autoComplete="name" value={values.name} onChange={set("name")} error={fieldErrors.name} />
         <TextField
           label="Email"
@@ -81,19 +81,23 @@ export function SignupForm() {
           hint="At least 8 characters."
         />
         {message && (
-          <p role="alert" className="text-[13px] text-danger-text">
+          <p role="alert" className="rounded-sm bg-danger-soft px-3 py-2 text-[13px] text-danger-text">
             {message}
           </p>
         )}
-        <Button type="submit" size="lg" className="w-full" disabled={busy}>
+        <Button type="submit" size="lg" variant="inverse" className="w-full" disabled={busy}>
           {busy ? "Creating account…" : "Create account"}
         </Button>
       </form>
 
-      <p className="mt-6 text-[14px] text-fg-muted">
+      <p className="mt-6 text-center text-[14px] text-fg-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-fg hover:underline">
+        <Link href="/login" className="font-medium text-fg underline underline-offset-2">
           Log in
+        </Link>{" "}
+        or{" "}
+        <Link href="/login?demo=1" className="font-medium text-fg underline underline-offset-2">
+          try the demo
         </Link>
       </p>
     </>

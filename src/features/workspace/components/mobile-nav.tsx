@@ -1,7 +1,7 @@
 "use client";
 
 import * as D from "@radix-ui/react-dialog";
-import { LogOut, Menu as MenuIcon, X } from "lucide-react";
+import { LogOut, Menu as MenuIcon, Settings, X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -75,6 +75,14 @@ export function MobileNav() {
           </nav>
           <div className="flex items-center justify-between gap-2 border-t p-3">
             <ThemeToggle />
+            <Link
+              href="/app/settings"
+              onClick={() => setOpen(false)}
+              className="inline-flex h-8 items-center gap-2 rounded-sm px-2.5 text-[13px] text-fg-muted hover:bg-sunken hover:text-fg"
+            >
+              <Settings aria-hidden className="size-4" strokeWidth={1.75} />
+              Settings
+            </Link>
             <button
               type="button"
               onClick={() => void signOut({ redirectTo: "/" })}
