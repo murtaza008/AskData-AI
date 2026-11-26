@@ -27,7 +27,7 @@ export function DataTable({ columns, rows, truncated }: DataTableProps) {
 
   return (
     <div>
-      <div className="max-h-[420px] overflow-auto">
+      <div className="max-h-[420px] overflow-auto" tabIndex={0} role="region" aria-label="Result rows">
         <table className="w-full border-separate border-spacing-0 text-[14px]">
           <thead>
             <tr>

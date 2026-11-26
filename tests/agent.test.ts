@@ -241,3 +241,104 @@ describe("runAgent", () => {
     expect(agentAnswer.insight).toMatch(/rate limit/i);
   });
 });
+
+describe("main model and fallback", () => {
+  const apiError = (statusCode: number, message: string) =>
+    Object.assign(new Error(message), { name: "AI_APICallError", statusCode, isRetryable: statusCode >= 500 });
+
+  async function runWithFallback(
+    primary: InstanceType<typeof MockLanguageModelV4>,
+    options: { abort?: AbortController; stepTimeoutMs?: number } = {},
+  ) {
+    const fallback = new MockLanguageModelV4({
+      doGenerate: [toolCall("runQuery", { sql: GOOD_SQL }), answer()],
+    });
+    const steps: AgentStep[] = [];
+    const agentAnswer = await runAgent({
+      question: "Revenue by status?",
+      history: [],
+      dataSource,
+      modelOverride: { id: "google:gemini-flash-latest", model: primary },
+      fallbackOverride: { id: "google:gemini-flash-lite-latest", model: fallback },
+      stepTimeoutMs: options.stepTimeoutMs ?? 10_000,
+      abortSignal: options.abort?.signal,
+      onStep: (step) => steps.push(step),
+    });
+    return { agentAnswer, fallback, steps };
+  }
+
+  beforeEach(() => {
+    runGuardedQuery.mockResolvedValue(result);
+  });
+
+  it("busy (429): sends the same request to the fallback model", async () => {
+    const primary = new MockLanguageModelV4({
+      doGenerate: async () => {
+        throw apiError(429, "429 RESOURCE_EXHAUSTED: quota exceeded");
+      },
+    });
+    const { agentAnswer, fallback, steps } = await runWithFallback(primary);
+    expect(primary.doGenerateCalls).toHaveLength(1); // no silent retry on the busy model
+    expect(fallback.doGenerateCalls.length).toBeGreaterThan(0);
+    expect(JSON.stringify(fallback.doGenerateCalls[0].prompt)).toContain("Revenue by status?");
+    expect(agentAnswer.status).toBe("answered");
+    expect(agentAnswer.model).toBe("google:gemini-flash-lite-latest");
+    expect(steps.some((step) => step.kind === "model" && /switched to Gemini Flash Lite/.test(step.label))).toBe(true);
+  });
+
+  it("server error (503): falls back too", async () => {
+    const primary = new MockLanguageModelV4({
+      doGenerate: async () => {
+        throw apiError(503, "503 UNAVAILABLE");
+      },
+    });
+    const { agentAnswer } = await runWithFallback(primary);
+    expect(agentAnswer.status).toBe("answered");
+    expect(agentAnswer.model).toBe("google:gemini-flash-lite-latest");
+  });
+
+  it("slow: a step over the time limit hands over to the fallback", async () => {
+    const primary = new MockLanguageModelV4({
+      doGenerate: ({ abortSignal }) =>
+        new Promise((_, reject) => {
+          const timer = setTimeout(() => reject(new Error("never answered")), 5_000);
+          abortSignal?.addEventListener("abort", () => {
+            clearTimeout(timer);
+            reject(abortSignal.reason ?? new Error("aborted"));
+          });
+        }),
+    });
+    const startedAt = Date.now();
+    const { agentAnswer } = await runWithFallback(primary, { stepTimeoutMs: 80 });
+    expect(Date.now() - startedAt).toBeLessThan(3_000);
+    expect(agentAnswer.status).toBe("answered");
+    expect(agentAnswer.model).toBe("google:gemini-flash-lite-latest");
+  });
+
+  it("bad request (400): shows the real error and does not fall back", async () => {
+    const primary = new MockLanguageModelV4({
+      doGenerate: async () => {
+        throw apiError(400, "400 INVALID_ARGUMENT: function declaration is malformed");
+      },
+    });
+    const { agentAnswer, fallback } = await runWithFallback(primary);
+    expect(fallback.doGenerateCalls).toHaveLength(0);
+    expect(agentAnswer.status).toBe("error");
+    expect(agentAnswer.insight).toContain("INVALID_ARGUMENT");
+  });
+
+  it("user cancel: stops without falling back", async () => {
+    const abort = new AbortController();
+    const primary = new MockLanguageModelV4({
+      doGenerate: ({ abortSignal }) =>
+        new Promise((_, reject) => {
+          abortSignal?.addEventListener("abort", () => reject(Object.assign(new Error("The operation was aborted"), { name: "AbortError" })));
+          setTimeout(() => abort.abort(), 20);
+        }),
+    });
+    const { agentAnswer, fallback } = await runWithFallback(primary, { abort });
+    expect(fallback.doGenerateCalls).toHaveLength(0);
+    expect(agentAnswer.status).toBe("error");
+    expect(agentAnswer.insight).toBe("Stopped.");
+  });
+});

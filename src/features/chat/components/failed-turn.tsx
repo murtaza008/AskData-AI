@@ -10,28 +10,31 @@ type FailedTurnProps = {
   onDismiss: () => void;
 };
 
-/** A question that failed for a reason outside the data — offer a retry. */
+/** A question that failed for a reason outside the data. The real reason is shown, with a retry. */
 export function FailedTurn({ turn, onRetry, onDismiss }: FailedTurnProps) {
+  const stopped = turn.message === "Stopped.";
   return (
-    <article className="space-y-4">
-      <UserQuestion text={turn.question} />
-      <Notice
-        tone="error"
-        title="That didn't go through"
-        action={
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onRetry}>
-              <RotateCcw className="size-3.5" strokeWidth={1.5} />
-              Try again
-            </Button>
-            <Button variant="ghost" size="sm" onClick={onDismiss}>
-              Dismiss
-            </Button>
-          </div>
-        }
-      >
-        {turn.message}
-      </Notice>
+    <article className="animate-rise">
+      <UserQuestion text={turn.question} meta={stopped ? "Stopped" : "Not answered"} />
+      <div className="ml-3 mt-4 border-l-2 border-danger/40 pl-6">
+        <Notice
+          tone={stopped ? "info" : "error"}
+          title={stopped ? "You stopped this question" : "That didn't go through"}
+          action={
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={onRetry}>
+                <RotateCcw aria-hidden className="size-3.5" />
+                Ask again
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onDismiss}>
+                Dismiss
+              </Button>
+            </div>
+          }
+        >
+          {stopped ? "Nothing was saved. Ask it again whenever you like." : turn.message}
+        </Notice>
+      </div>
     </article>
   );
 }

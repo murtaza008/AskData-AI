@@ -3,11 +3,16 @@ import { generateText, isStepCount, type LanguageModel, type ModelMessage, tool 
 import { z } from "zod";
 import { resolveChartSpec } from "@/lib/agent/chart";
 import { CHART_TYPES, VALUE_FORMATS, type AgentAnswer, type AgentStep, type QueryResult } from "@/lib/agent/types";
-import { describeModelError, isOverloadError, resolveFallbackModel, resolveModel } from "@/server/ai/models";
+import { describeModelError, isRetryableModelError, resolveFallbackModel, resolveModel } from "@/server/ai/models";
 import { env } from "@/server/env";
 import { QueryRejectedError, runGuardedQuery } from "@/server/sql/execute";
 import { type DataSource, renderSchemaForModel } from "@/server/sql/schema";
+import { modelLabel } from "@/lib/models";
 import { buildSystemPrompt, MAX_AGENT_STEPS, MAX_QUERY_FAILURES, ROWS_SHOWN_TO_MODEL, RUN_BUDGET_MS } from "./prompt";
+
+/** The main model's time per step before the fallback takes over, and the fallback's. */
+const PRIMARY_STEP_MS = 10_000;
+const FALLBACK_STEP_MS = 20_000;
 
 /**
  * The AskData agent: a multi-step tool-calling loop on the Vercel AI SDK.
@@ -42,6 +47,10 @@ export type RunAgentInput = {
   modelId?: string | null;
   /** Inject a model directly instead of resolving `modelId` (used by tests). */
   modelOverride?: { id: string; model: LanguageModel };
+  /** Inject the fallback model (used by tests; otherwise the provider's lighter model). */
+  fallbackOverride?: { id: string; model: LanguageModel } | null;
+  /** Time each step of the main model may take before the fallback takes over. */
+  stepTimeoutMs?: number;
   onStep?: (step: AgentStep) => void;
   abortSignal?: AbortSignal;
 };
@@ -226,7 +235,7 @@ export async function runAgent(input: RunAgentInput): Promise<AgentAnswer> {
   };
 
   const instructions = buildSystemPrompt(env.queryRowLimit, readSchema());
-  const generate = (languageModel: LanguageModel) =>
+  const generate = (languageModel: LanguageModel, stepMs: number, maxRetries: number) =>
     generateText({
       model: languageModel,
       instructions,
@@ -235,9 +244,9 @@ export async function runAgent(input: RunAgentInput): Promise<AgentAnswer> {
       tools,
       toolChoice: "required",
       stopWhen: isStepCount(MAX_AGENT_STEPS),
-      maxRetries: 1,
-      // Whatever is left of the run's time budget.
-      timeout: { totalMs: Math.max(1000, RUN_BUDGET_MS - (Date.now() - started)) },
+      maxRetries,
+      // Each step gets `stepMs`; the run as a whole gets what is left of its budget.
+      timeout: { totalMs: Math.max(1000, RUN_BUDGET_MS - (Date.now() - started)), stepMs },
       abortSignal: input.abortSignal,
       prepareStep: () => {
         // Once repairs are exhausted, force the finish.
@@ -249,16 +258,28 @@ export async function runAgent(input: RunAgentInput): Promise<AgentAnswer> {
   try {
     let result: Awaited<ReturnType<typeof generate>>;
     try {
-      result = await generate(model);
+      // The main model gets ~10 s per step and no silent retries: a busy model
+      // is better replaced than waited for.
+      result = await generate(model, input.stepTimeoutMs ?? PRIMARY_STEP_MS, 0);
     } catch (error) {
-      // Free-tier models are regularly "overloaded" for a few seconds. If that
-      // happens before any query ran, start over once on the provider's lighter model.
-      const fallback = input.modelOverride ? null : resolveFallbackModel(info.id);
+      // Timeout, 429 or 5xx before any query ran: send the same request to the
+      // fallback model. A cancel by the user, or any other 4xx, is not retried.
+      const fallback =
+        input.fallbackOverride !== undefined
+          ? input.fallbackOverride
+            ? { info: { id: input.fallbackOverride.id }, model: input.fallbackOverride.model }
+            : null
+          : input.modelOverride
+            ? null
+            : resolveFallbackModel(info.id);
       const timeLeft = RUN_BUDGET_MS - (Date.now() - started);
-      if (!fallback || !isOverloadError(error) || results.length > 0 || timeLeft < 15_000) throw error;
-      console.warn(`[agent] ${info.id} is overloaded; retrying with ${fallback.info.id}`);
+      if (input.abortSignal?.aborted || !fallback || !isRetryableModelError(error) || results.length > 0 || timeLeft < 8_000) {
+        throw error;
+      }
+      console.warn(`[agent] ${info.id} failed (${error instanceof Error ? error.message.slice(0, 80) : "error"}); retrying with ${fallback.info.id}`);
+      report({ id: "fallback", kind: "model", status: "ok", label: `Main model busy · switched to ${modelLabel(fallback.info.id)}` });
       info = fallback.info;
-      result = await generate(fallback.model);
+      result = await generate(fallback.model, Math.max(FALLBACK_STEP_MS, (input.stepTimeoutMs ?? 0) * 2), 1);
     }
 
     const submitted = result.staticToolCalls.find((call) => call.toolName === "submitAnswer")?.input;
@@ -337,6 +358,7 @@ export async function runAgent(input: RunAgentInput): Promise<AgentAnswer> {
         info.id,
       );
     }
-    return finish({ ...empty, status: "error", insight: describeModelError(error) }, info.id);
+    const insight = input.abortSignal?.aborted ? "Stopped." : describeModelError(error);
+    return finish({ ...empty, status: "error", insight }, info.id);
   }
 }

@@ -22,14 +22,32 @@ export function usePinData(id: string) {
     queryFn: () => api<PinData>(`/api/pins/${id}/data`),
     staleTime: 60_000,
     retry: false,
+    // An optimistic pin has no server id yet.
+    enabled: !id.startsWith("pending-"),
   });
 }
 
+/**
+ * Pin an answer's chart. Optimistic: the dashboard's list gains the chart at
+ * once and drops it again if the server refuses (e.g. the 24-chart limit).
+ */
 export function useCreatePin() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (pin: NewPin) => api<{ pin: Pin }>("/api/pins", { method: "POST", json: pin }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.pins }),
+    onMutate: async (pin) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.pins });
+      const previous = queryClient.getQueryData<{ pins: Pin[] }>(queryKeys.pins);
+      if (previous) {
+        const draft: Pin = { ...pin, id: `pending-${Date.now()}`, createdAt: new Date().toISOString() };
+        queryClient.setQueryData<{ pins: Pin[] }>(queryKeys.pins, { pins: [draft, ...previous.pins] });
+      }
+      return { previous };
+    },
+    onError: (_error, _pin, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.pins, context.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.pins }),
   });
 }
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { ArrowUp, Square } from "lucide-react";
-import { type FormEvent, type KeyboardEvent, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useLayoutEffect, useRef, useState } from "react";
 import { ModelPicker } from "@/features/workspace/components/model-picker";
+import { cn } from "@/lib/utils";
 
 const MAX_LENGTH = 500;
 
@@ -13,10 +14,19 @@ type ChatComposerProps = {
   disabled?: boolean;
 };
 
-/** Question box. Enter sends, Shift+Enter adds a line; turns into Stop while the agent works. */
+/** Question box. Enter sends, Shift+Enter adds a line; while the agent works it offers Stop. */
 export function ChatComposer({ onAsk, onStop, isBusy, disabled }: ChatComposerProps) {
   const [text, setText] = useState("");
+  const area = useRef<HTMLTextAreaElement>(null);
   const canSend = text.trim().length > 1 && !isBusy && !disabled;
+
+  // Grow with the text, up to about six lines.
+  useLayoutEffect(() => {
+    const element = area.current;
+    if (!element) return;
+    element.style.height = "auto";
+    element.style.height = `${Math.min(element.scrollHeight, 168)}px`;
+  }, [text]);
 
   const submit = () => {
     if (!canSend) return;
@@ -37,20 +47,24 @@ export function ChatComposer({ onAsk, onStop, isBusy, disabled }: ChatComposerPr
     }
   };
 
+  const remaining = MAX_LENGTH - text.length;
+
   return (
-    <div className="border-t bg-bg">
-      <form className="mx-auto max-w-[860px] px-4 py-4 sm:px-6" onSubmit={onSubmit}>
-        <div className="flex items-end gap-2 rounded-md border bg-surface p-2 focus-within:border-border-strong focus-within:ring-2 focus-within:ring-focus/20">
+    <div className="no-print shrink-0 border-t bg-bg/95 pb-[max(env(safe-area-inset-bottom),0px)]">
+      <form className="mx-auto max-w-[880px] px-4 pb-4 pt-3 sm:px-6" onSubmit={onSubmit}>
+        <div className="panel flex items-end gap-2 p-2 transition-[border-color,box-shadow] focus-within:border-accent focus-within:shadow-[0_0_0_3px_var(--accent-soft)]">
           <textarea
+            ref={area}
             value={text}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={onKeyDown}
-            rows={2}
+            rows={1}
             maxLength={MAX_LENGTH}
             disabled={disabled}
             placeholder="Ask about sales, customers, products…"
             aria-label="Your question"
-            className="min-h-[48px] flex-1 resize-none bg-transparent px-2 py-1.5 text-[15px] placeholder:text-fg-muted focus:outline-none disabled:opacity-60"
+            aria-describedby="composer-hint"
+            className="min-h-[44px] flex-1 resize-none bg-transparent px-2 py-2.5 text-[15.5px] text-fg placeholder:text-fg-subtle focus:outline-none disabled:opacity-60"
           />
           {isBusy ? (
             <button
@@ -58,25 +72,34 @@ export function ChatComposer({ onAsk, onStop, isBusy, disabled }: ChatComposerPr
               onClick={onStop}
               aria-label="Stop"
               title="Stop"
-              className="grid size-9 place-items-center rounded-md border bg-surface text-fg hover:bg-sunken"
+              data-press=""
+              className="grid size-10 shrink-0 place-items-center rounded-md border bg-surface text-fg hover:bg-sunken"
             >
-              <Square className="size-3.5 fill-current" strokeWidth={0} />
+              <Square aria-hidden className="size-3.5 fill-current" strokeWidth={0} />
             </button>
           ) : (
             <button
               type="submit"
               disabled={!canSend}
-              aria-label="Send"
-              title="Send"
-              className="grid size-9 place-items-center rounded-md bg-accent text-accent-fg hover:bg-accent-hover disabled:opacity-40"
+              aria-label="Ask"
+              title="Ask (Enter)"
+              data-press=""
+              className="grid size-10 shrink-0 place-items-center rounded-md bg-accent text-accent-fg hover:bg-accent-hover disabled:opacity-40"
             >
-              <ArrowUp className="size-4" strokeWidth={2} />
+              <ArrowUp aria-hidden className="size-4" strokeWidth={2.25} />
             </button>
           )}
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <ModelPicker />
-          <p className="text-[12px] text-fg-muted">Read-only · every query is validated, time-limited and row-capped</p>
+          <p id="composer-hint" className="text-[12px] text-fg-muted">
+            Enter to ask · Shift+Enter for a new line · read-only, validated, 5 s limit
+          </p>
+          {remaining < 80 && (
+            <span className={cn("num ml-auto text-[12px]", remaining < 20 ? "text-danger-text" : "text-fg-muted")}>
+              {remaining} left
+            </span>
+          )}
         </div>
       </form>
     </div>

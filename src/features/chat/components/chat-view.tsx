@@ -12,6 +12,7 @@ import { useConversation } from "../hooks/use-conversations";
 import { useModels } from "../hooks/use-models";
 import { AnswerTurn } from "./answer-turn";
 import { ChatComposer } from "./chat-composer";
+import { DataSourceChip } from "./data-source-chip";
 import { EmptyChat } from "./empty-chat";
 import { FailedTurn } from "./failed-turn";
 import { PendingTurn } from "./pending-turn";
@@ -70,11 +71,12 @@ export function ChatView({ conversationId, initialQuestion }: ChatViewProps) {
   }, [turns.length, stepCount, pending?.question, failed]);
 
   const isEmpty = turns.length === 0 && !pending && !failed;
+  const title = conversation.data?.title ?? turns[0]?.question ?? pending?.question ?? failed?.question;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[860px] px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-[880px] px-4 py-8 sm:px-6">
           {!isConfigured && (
             <Notice tone="error" title="No AI provider is configured" className="mb-8">
               Add a free <span className="num">GOOGLE_GENERATIVE_AI_API_KEY</span> to the environment and restart the
@@ -82,9 +84,21 @@ export function ChatView({ conversationId, initialQuestion }: ChatViewProps) {
             </Notice>
           )}
 
+          {!isEmpty && title && !(conversationId && conversation.isLoading) && (
+            <header className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b pb-4">
+              <div className="min-w-0">
+                <p className="eyebrow">Conversation</p>
+                <h1 className="mt-1 truncate text-[20px]" title={title}>
+                  {title}
+                </h1>
+              </div>
+              <DataSourceChip />
+            </header>
+          )}
+
           {conversationId && conversation.isLoading ? (
-            <div className="flex items-center gap-2.5 pt-10 text-[14px] text-fg-muted">
-              <Spinner /> Loading conversation…
+            <div role="status" className="flex items-center gap-2.5 pt-10 text-[14px] text-fg-muted">
+              <Spinner /> Loading the conversation…
             </div>
           ) : conversationId && conversation.isError ? (
             <Notice
@@ -101,7 +115,7 @@ export function ChatView({ conversationId, initialQuestion }: ChatViewProps) {
           ) : isEmpty ? (
             <EmptyChat onAsk={handleAsk} disabled={isBusy || !isConfigured} />
           ) : (
-            <div className="space-y-12">
+            <div className="space-y-14">
               {turns.map((turn, index) => (
                 <AnswerTurn
                   key={turn.id}

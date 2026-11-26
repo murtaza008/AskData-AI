@@ -62,6 +62,33 @@ export function resolveModel(requestedId?: string | null): { info: ModelInfo; mo
   }
 }
 
+/** HTTP status of a provider failure, looking through the SDK's retry and cause wrappers. */
+export function statusOf(error: unknown, depth = 0): number | undefined {
+  if (!error || typeof error !== "object" || depth > 4) return undefined;
+  const record = error as { statusCode?: unknown; lastError?: unknown; cause?: unknown };
+  if (typeof record.statusCode === "number") return record.statusCode;
+  return statusOf(record.lastError, depth + 1) ?? statusOf(record.cause, depth + 1);
+}
+
+/** True when the call ran out of time (the SDK's step/total timeout, or the provider's). */
+export function isTimeoutError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const text = `${error.name} ${error.message}`.toLowerCase();
+  return text.includes("timeout") || text.includes("timed out");
+}
+
+/**
+ * Worth sending the same request to the fallback model: the main model timed
+ * out, was rate limited (429) or failed on the provider's side (5xx). Any
+ * other 4xx is a real problem with the request or the key, so it is shown to
+ * the user instead of being hidden behind a retry.
+ */
+export function isRetryableModelError(error: unknown): boolean {
+  const status = statusOf(error);
+  if (status !== undefined) return status === 429 || status >= 500;
+  return isTimeoutError(error) || isOverloadError(error);
+}
+
 /** True for "try again shortly" failures: provider overloaded or rate limited. */
 export function isOverloadError(error: unknown): boolean {
   const lower = (error instanceof Error ? error.message : String(error)).toLowerCase();

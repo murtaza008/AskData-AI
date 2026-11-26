@@ -5,6 +5,7 @@ import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { buttonClass } from "@/components/ui/button";
+import { HoverCard, HoverTitle } from "@/components/ui/hover-card";
 import { IconButton } from "@/components/ui/icon-button";
 import { Notice } from "@/components/ui/notice";
 import {
@@ -76,13 +77,29 @@ function Row({ conversation, index, canEdit }: { conversation: ConversationSumma
         </form>
       ) : (
         <>
-          <Link
-            href={`/app/c/${conversation.id}`}
-            className="min-w-0 flex-1 truncate text-[14.5px] text-fg hover:text-accent-text"
-            title={conversation.title}
+          <HoverCard
+            delay="long"
+            width={340}
+            trigger={
+              <Link href={`/app/c/${conversation.id}`} className="min-w-0 flex-1 truncate text-[14.5px] text-fg hover:text-accent-text">
+                {rename.isPending ? title : conversation.title}
+              </Link>
+            }
           >
-            {rename.isPending ? title : conversation.title}
-          </Link>
+            <HoverTitle meta={`${conversation.turns} ${conversation.turns === 1 ? "question" : "questions"}`}>
+              {conversation.title}
+            </HoverTitle>
+            {conversation.lastInsight ? (
+              <p className="mt-2 line-clamp-4 text-fg-muted">{conversation.lastInsight.replace(/\*\*/g, "")}</p>
+            ) : (
+              <p className="mt-2 text-fg-muted">No answer stored yet.</p>
+            )}
+            {conversation.lastChartType && (
+              <p className="mt-2 text-[12px] text-fg-muted">
+                Latest result: {conversation.lastChartType === "table" ? "a table" : `a ${conversation.lastChartType} chart`}
+              </p>
+            )}
+          </HoverCard>
           <span className="num shrink-0 text-[12px] text-fg-muted">{formatRelative(conversation.updatedAt)}</span>
           {canEdit && (
             <span className="flex shrink-0 gap-0.5 opacity-100 transition-opacity md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100">

@@ -166,3 +166,24 @@ test("review landing mobile", async ({ browser }) => {
   await page.screenshot({ path: path.join(dir, "landing-mobile-demos.png") });
   await context.close();
 });
+
+test("review ask flow", async ({ page }) => {
+  test.skip(Boolean(only && !only.includes("askflow")));
+  for (const theme of themes) {
+    await setTheme(page, theme);
+    await page.goto("/app/history");
+    await page.getByRole("link", { name: "What were our top 5 products by revenue last month?" }).click();
+    await expect(page.getByRole("region", { name: /^Result:/ }).first()).toBeVisible({ timeout: 30_000 });
+    await page.waitForLoadState("networkidle");
+    await shot(page, `conversation-${theme}`);
+    await page.getByRole("button", { name: /queries ·/ }).first().click();
+    await page.getByRole("button", { name: "SQL that ran" }).first().click();
+    await shot(page, `conversation-open-${theme}`);
+  }
+  await page.route("**/api/chat", () => {});
+  await page.goto("/app");
+  await page.getByRole("textbox", { name: "Your question" }).fill("Break down revenue by region");
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(500);
+  await shot(page, "ask-pending-dark");
+});

@@ -39,7 +39,8 @@ export type QueryResult = {
   durationMs: number;
 };
 
-export type StepKind = "schema" | "query" | "fix" | "answer";
+/** `model`: the main model was busy or slow and the fallback model took over. */
+export type StepKind = "schema" | "query" | "fix" | "answer" | "model";
 export type StepStatus = "running" | "ok" | "error";
 
 /** One line in the live "what the agent is doing" trace. */

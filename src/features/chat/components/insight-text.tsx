@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 export function InsightText({ text, className }: { text: string; className?: string }) {
   const parts = text.split(/\*\*(.+?)\*\*/g);
   return (
-    <p className={cn("max-w-[68ch] text-[16px] leading-[1.65]", className)}>
+    <p className={cn("max-w-[70ch] text-[16.5px] leading-[1.65] text-fg", className)}>
       {parts.map((part, index) =>
         index % 2 === 1 ? (
           <span key={index} className="key-num">

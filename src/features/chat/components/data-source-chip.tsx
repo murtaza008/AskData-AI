@@ -1,33 +1,45 @@
 "use client";
 
 import { Database } from "lucide-react";
+import { HoverCard, HoverTitle } from "@/components/ui/hover-card";
 import { formatCount } from "@/lib/format";
 import { useDataSource } from "../hooks/use-data-source";
 
-/** "Demo store · 5 tables · 9,453 orders" — what the agent can see. */
+/** "Demo store · 6 tables": what the agent can see, with the table list on hover or focus. */
 export function DataSourceChip() {
   const { data: tables, isError } = useDataSource();
 
-  let detail = "Loading tables…";
-  if (isError) detail = "Database not reachable";
-  else if (tables) {
-    const orders = tables.find((table) => table.name === "orders");
-    const uploads = tables.filter((table) => table.isUpload).length;
-    detail = [
-      `${tables.length} ${tables.length === 1 ? "table" : "tables"}`,
-      orders ? `${formatCount(orders.rowCount)} orders` : null,
-      uploads > 0 ? `${uploads} uploaded` : null,
-    ]
-      .filter(Boolean)
-      .join(" · ");
-  }
+  const label = isError ? "Database not reachable" : tables ? `${tables.length} ${tables.length === 1 ? "table" : "tables"}` : "Loading…";
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-sm border bg-surface px-2.5 py-1 text-[13px]">
-      <Database className="size-3.5" strokeWidth={1.5} />
-      <span>Demo store</span>
-      <span className="text-fg-muted">·</span>
-      <span className="num text-fg-muted">{detail}</span>
-    </div>
+    <HoverCard
+      width={300}
+      trigger={
+        <button
+          type="button"
+          className="inline-flex h-7 items-center gap-2 rounded-full border bg-surface px-2.5 text-[12.5px] text-fg-muted hover:border-border-strong hover:text-fg"
+        >
+          <Database aria-hidden className="size-3.5" />
+          <span className="text-fg">Demo store</span>
+          <span className="num">{label}</span>
+        </button>
+      }
+    >
+      <HoverTitle meta="read-only">Tables the agent can query</HoverTitle>
+      {tables ? (
+        <ul className="mt-2.5 space-y-1">
+          {tables.map((table) => (
+            <li key={table.name} className="flex items-baseline justify-between gap-3">
+              <span className="truncate font-mono text-[12px] text-fg">{table.name}</span>
+              <span className="num shrink-0 text-[11.5px] text-fg-muted">
+                {formatCount(table.rowCount)} rows{table.isUpload ? " · upload" : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-2 text-fg-muted">Loading the tables…</p>
+      )}
+    </HoverCard>
   );
 }
