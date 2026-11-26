@@ -3,7 +3,7 @@ import type { FieldDef } from "pg";
 import type { Cell, ColumnKind, QueryResult, ResultColumn, Row } from "@/lib/agent/types";
 import { analyticsPool } from "@/server/db/pools";
 import { env } from "@/server/env";
-import { type AllowedTable, validateSelect, withRowLimit } from "./validate";
+import { type AllowedTable, validateSelect, withRowLimit } from "@/lib/sql/validate";
 
 /** Schema holding the demo e-commerce dataset. */
 export const ANALYTICS_SCHEMA = "analytics";

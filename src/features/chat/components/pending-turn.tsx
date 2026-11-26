@@ -9,8 +9,8 @@ export function PendingTurn({ turn }: { turn: PendingTurnState }) {
       <UserQuestion text={turn.question} />
       <StepTrace steps={turn.steps} live />
       <div className="space-y-2" aria-hidden>
-        <div className="h-3 w-3/4 animate-pulse rounded-sm bg-muted" />
-        <div className="h-3 w-1/2 animate-pulse rounded-sm bg-muted" />
+        <div className="h-3 w-3/4 animate-pulse rounded-sm bg-sunken" />
+        <div className="h-3 w-1/2 animate-pulse rounded-sm bg-sunken" />
       </div>
     </article>
   );

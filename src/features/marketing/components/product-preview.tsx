@@ -7,9 +7,9 @@ import { ease } from "@/components/motion/reveal";
 import { SAMPLE_PRODUCTS, SAMPLE_QUESTION } from "../sample-data";
 
 const STEPS = [
-  { icon: Check, tone: "text-success", label: "Read schema · 5 tables" },
-  { icon: X, tone: "text-destructive", label: "Query failed: column \"qty\" does not exist" },
-  { icon: RotateCcw, tone: "text-highlight", label: "Fixed query · returned 5 rows" },
+  { icon: Check, tone: "text-success-text", label: "Read schema · 5 tables" },
+  { icon: X, tone: "text-danger-text", label: "Query failed: column \"qty\" does not exist" },
+  { icon: RotateCcw, tone: "text-accent-text", label: "Fixed query · returned 5 rows" },
 ];
 
 /** Fade/rise-in for one block of the preview, in sequence. */
@@ -28,15 +28,15 @@ function appear(order: number) {
  */
 export function ProductPreview() {
   return (
-    <div className="rounded-lg border bg-card shadow-pop">
+    <div className="rounded-lg border bg-surface shadow-[var(--shadow-md)]">
       <div className="flex items-center justify-between border-b px-4 py-2">
-        <span className="num text-[12px] text-muted-foreground">Demo store · 5 tables</span>
-        <span className="label-caps">Sample answer</span>
+        <span className="num text-[12px] text-fg-muted">Demo store · 5 tables</span>
+        <span className="eyebrow">Sample answer</span>
       </div>
       <div className="space-y-4 p-4 sm:p-5">
         <motion.p
           {...appear(0)}
-          className="ml-auto w-fit max-w-[90%] rounded-md border bg-background px-3 py-1.5 text-[14px]"
+          className="ml-auto w-fit max-w-[90%] rounded-md border bg-bg px-3 py-1.5 text-[14px]"
         >
           {SAMPLE_QUESTION}
         </motion.p>
@@ -45,7 +45,7 @@ export function ProductPreview() {
           {STEPS.map(({ icon: Icon, tone, label }, index) => (
             <motion.li key={label} {...appear(1 + index)} className="flex items-center gap-2.5">
               <Icon className={`size-3.5 shrink-0 ${tone}`} strokeWidth={2} />
-              <span className={tone === "text-destructive" ? "text-destructive" : undefined}>{label}</span>
+              <span className={tone === "text-danger-text" ? "text-danger-text" : undefined}>{label}</span>
             </motion.li>
           ))}
         </ul>
@@ -56,21 +56,21 @@ export function ProductPreview() {
         </motion.p>
 
         <motion.div {...appear(5)}>
-          <div className="label-caps mb-2">Revenue by product</div>
+          <div className="eyebrow mb-2">Revenue by product</div>
           <DataChart spec={SAMPLE_PRODUCTS.spec} rows={SAMPLE_PRODUCTS.rows} height={200} />
         </motion.div>
 
         <motion.div
           {...appear(6)}
-          className="flex items-center gap-2 overflow-hidden rounded-md border bg-muted/60 px-3 py-2 text-[13px]"
+          className="flex items-center gap-2 overflow-hidden rounded-md border bg-sunken/60 px-3 py-2 text-[13px]"
         >
-          <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.5} />
-          <code className="truncate font-mono text-muted-foreground">
+          <ChevronRight className="size-3.5 shrink-0 text-fg-muted" strokeWidth={1.5} />
+          <code className="truncate font-mono text-fg-muted">
             <span className="text-sql-keyword">SELECT</span> p.name, <span className="text-sql-fn">SUM</span>
             (oi.quantity * oi.unit_price) … <span className="text-sql-keyword">LIMIT</span>{" "}
             <span className="text-sql-number">5</span>
           </code>
-          <span className="ml-auto shrink-0 text-[12px] text-muted-foreground">Show SQL</span>
+          <span className="ml-auto shrink-0 text-[12px] text-fg-muted">Show SQL</span>
         </motion.div>
       </div>
     </div>

@@ -1,4 +1,6 @@
-import { Parser } from "node-sql-parser";
+// The PostgreSQL-only build of the parser: same grammar the server always used, a fraction of the size,
+// so the landing page can run this exact validator in the browser.
+import { Parser } from "node-sql-parser/build/postgresql";
 
 /**
  * Static SQL validation — safety layer 2 (layer 1 is the read-only DB role).

@@ -2,9 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useSyncExternalStore } from "react";
-import { api } from "@/lib/api-client";
-import type { ModelsResponse } from "@/lib/models";
-import { queryKeys } from "@/lib/query-keys";
+import { q } from "@/lib/queries";
 
 const STORAGE_KEY = "askdata:model";
 const CHANGE_EVENT = "askdata:model-change";
@@ -31,11 +29,7 @@ function readStored(): string | null {
  * user's pick, remembered in localStorage and shared across components.
  */
 export function useModels() {
-  const query = useQuery({
-    queryKey: queryKeys.models,
-    queryFn: () => api<ModelsResponse>("/api/models"),
-    staleTime: 10 * 60_000,
-  });
+  const query = useQuery(q.models());
 
   const stored = useSyncExternalStore(subscribe, readStored, () => null);
   const models = query.data?.models ?? [];

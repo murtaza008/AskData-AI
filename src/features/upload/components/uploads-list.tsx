@@ -29,25 +29,25 @@ export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
     });
 
   if (uploads.length === 0) {
-    return <p className="text-[14px] text-muted-foreground">No uploaded tables yet.</p>;
+    return <p className="text-[14px] text-fg-muted">No uploaded tables yet.</p>;
   }
 
   return (
-    <ul className="divide-y rounded-lg border bg-card">
+    <ul className="divide-y rounded-lg border bg-surface">
       {uploads.map((upload) => (
         <li key={upload.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center gap-2">
               <span className="truncate font-medium">{upload.originalName}</span>
               {upload.isSample && (
-                <span className="shrink-0 rounded-sm border px-1.5 text-[11px] text-highlight">Sample</span>
+                <span className="shrink-0 rounded-sm border px-1.5 text-[11px] text-accent-text">Sample</span>
               )}
             </div>
-            <div className="num mt-0.5 truncate text-[12px] text-muted-foreground">
+            <div className="num mt-0.5 truncate text-[12px] text-fg-muted">
               {upload.tableName} · {formatCount(upload.rowCount)} rows · {upload.columns.length} columns ·{" "}
               {formatBytes(upload.sizeBytes)}
             </div>
-            <div className="mt-0.5 text-[12px] text-muted-foreground">
+            <div className="mt-0.5 text-[12px] text-fg-muted">
               {upload.isSample
                 ? "Included with the demo account · always available"
                 : `Deleted automatically ${formatRelative(upload.expiresAt)}`}
@@ -65,7 +65,7 @@ export function UploadsList({ uploads }: { uploads: UploadDTO[] }) {
               label={`Delete ${upload.originalName}`}
               onClick={() => remove(upload)}
               disabled={deleteUpload.isPending}
-              className="hover:text-destructive"
+              className="hover:text-danger-text"
             >
               <Trash2 className="size-4" strokeWidth={1.5} />
             </IconButton>

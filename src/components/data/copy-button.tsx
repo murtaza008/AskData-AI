@@ -29,7 +29,7 @@ export function CopyButton({ text, className }: { text: string; className?: stri
       type="button"
       onClick={copy}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border bg-card px-2 py-1 text-[12px] text-muted-foreground transition-colors hover:text-foreground",
+        "inline-flex items-center gap-1.5 rounded-md border bg-surface px-2 py-1 text-[12px] text-fg-muted transition-colors hover:text-fg",
         className,
       )}
     >

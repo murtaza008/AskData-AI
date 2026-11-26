@@ -10,7 +10,7 @@ import { downloadTextFile, fileSlug, toCsv } from "@/lib/csv";
 import { formatCount } from "@/lib/format";
 
 const actionClass =
-  "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50";
+  "inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] text-fg-muted transition-colors hover:bg-sunken hover:text-fg disabled:opacity-50";
 
 type ResultActionsProps = {
   question: string;

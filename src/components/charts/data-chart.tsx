@@ -36,7 +36,7 @@ export function DataChart({ spec, rows, height = 280 }: DataChartProps) {
 
   const all = toData(spec, rows);
   if (all.length === 0) {
-    return <p className="py-10 text-center text-[14px] text-muted-foreground">Nothing to plot for this result.</p>;
+    return <p className="py-10 text-center text-[14px] text-fg-muted">Nothing to plot for this result.</p>;
   }
 
   const limit = spec.type === "line" ? MAX_LINE_POINTS : spec.type === "pie" ? MAX_PIE_SLICES : MAX_BARS;
@@ -56,7 +56,7 @@ export function DataChart({ spec, rows, height = 280 }: DataChartProps) {
         <BarChartView data={data} format={spec.yFormat} measure={measure} height={barHeight} horizontal={horizontal} />
       )}
       {all.length > data.length && (
-        <figcaption className="mt-2 text-[12px] text-muted-foreground">
+        <figcaption className="mt-2 text-[12px] text-fg-muted">
           Showing the first {data.length} of {all.length} rows. The table below has all of them.
         </figcaption>
       )}

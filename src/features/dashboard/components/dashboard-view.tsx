@@ -13,10 +13,10 @@ import { PinnedChartCard } from "./pinned-chart-card";
 function EmptyDashboard() {
   return (
     <div className="rounded-lg border border-dashed px-6 py-14 text-center">
-      <PinIcon className="mx-auto size-5 text-muted-foreground" strokeWidth={1.5} />
+      <PinIcon className="mx-auto size-5 text-fg-muted" strokeWidth={1.5} />
       <h2 className="mt-3 text-[20px]">Nothing pinned yet</h2>
-      <p className="mx-auto mt-2 max-w-[46ch] text-[14px] text-muted-foreground">
-        Ask a question, then use <span className="font-medium text-foreground">Pin</span> on the answer to keep its
+      <p className="mx-auto mt-2 max-w-[46ch] text-[14px] text-fg-muted">
+        Ask a question, then use <span className="font-medium text-fg">Pin</span> on the answer to keep its
         chart here. Pinned charts re-run their query every time you open the dashboard.
       </p>
       <Link href="/app" className={buttonClass("primary", "md", "mt-5")}>
@@ -35,7 +35,7 @@ export function DashboardView() {
       <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 className="text-[28px]">Dashboard</h1>
-          <span className="label-caps">Demo store · last 30 days</span>
+          <span className="eyebrow">Demo store · last 30 days</span>
         </div>
 
         <div className="mt-6">
@@ -45,7 +45,7 @@ export function DashboardView() {
         <div className="mt-10 flex items-baseline justify-between">
           <h2 className="text-[20px]">Pinned charts</h2>
           {pins.data && pins.data.length > 0 && (
-            <span className="num text-[12px] text-muted-foreground">{pins.data.length} pinned</span>
+            <span className="num text-[12px] text-fg-muted">{pins.data.length} pinned</span>
           )}
         </div>
 
@@ -53,7 +53,7 @@ export function DashboardView() {
           {pins.isLoading ? (
             <div className="grid gap-4 lg:grid-cols-2" aria-hidden>
               {[0, 1].map((index) => (
-                <div key={index} className="h-[340px] animate-pulse rounded-lg border bg-card" />
+                <div key={index} className="h-[340px] animate-pulse rounded-lg border bg-surface" />
               ))}
             </div>
           ) : pins.isError ? (

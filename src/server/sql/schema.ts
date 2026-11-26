@@ -3,7 +3,7 @@ import type { PoolClient } from "pg";
 import { analyticsPool } from "@/server/db/pools";
 import { prisma } from "@/server/db/prisma";
 import { ANALYTICS_SCHEMA, UPLOADS_SCHEMA } from "./execute";
-import type { AllowedTable } from "./validate";
+import type { AllowedTable } from "@/lib/sql/validate";
 
 /**
  * Schema introspection for the agent's getSchema tool.

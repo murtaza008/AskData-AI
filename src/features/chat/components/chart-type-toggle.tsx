@@ -32,7 +32,7 @@ export function ChartTypeToggle({ value, onChange, allowPie }: ChartTypeTogglePr
           onClick={() => onChange(type)}
           className={cn(
             "p-1.5 first:rounded-l-[3px] last:rounded-r-[3px]",
-            value === type ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
+            value === type ? "bg-sunken text-fg" : "text-fg-muted hover:text-fg",
           )}
         >
           <Icon className="size-4" strokeWidth={1.5} />

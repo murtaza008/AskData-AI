@@ -1,0 +1,50 @@
+[
+  {
+    "route": "/",
+    "status": 200,
+    "scripts": 12,
+    "kb": 339.5
+  },
+  {
+    "route": "/login",
+    "status": 200,
+    "scripts": 13,
+    "kb": 342.6
+  },
+  {
+    "route": "/signup",
+    "status": 200,
+    "scripts": 14,
+    "kb": 372.4
+  },
+  {
+    "route": "/this-page-does-not-exist",
+    "status": 404,
+    "scripts": 10,
+    "kb": 217.2
+  },
+  {
+    "route": "/app",
+    "status": 200,
+    "scripts": 16,
+    "kb": 377.7
+  },
+  {
+    "route": "/app/dashboard",
+    "status": 200,
+    "scripts": 16,
+    "kb": 374.3
+  },
+  {
+    "route": "/app/upload",
+    "status": 200,
+    "scripts": 15,
+    "kb": 270.4
+  },
+  {
+    "route": "/app/c/77b7329d-e58f-4ac7-b96b-a729dd6b2c77",
+    "status": 200,
+    "scripts": 16,
+    "kb": 377.7
+  }
+]

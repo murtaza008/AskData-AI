@@ -23,11 +23,11 @@ export function DataSourceChip() {
   }
 
   return (
-    <div className="inline-flex items-center gap-2 rounded-sm border bg-card px-2.5 py-1 text-[13px]">
+    <div className="inline-flex items-center gap-2 rounded-sm border bg-surface px-2.5 py-1 text-[13px]">
       <Database className="size-3.5" strokeWidth={1.5} />
       <span>Demo store</span>
-      <span className="text-muted-foreground">·</span>
-      <span className="num text-muted-foreground">{detail}</span>
+      <span className="text-fg-muted">·</span>
+      <span className="num text-fg-muted">{detail}</span>
     </div>
   );
 }

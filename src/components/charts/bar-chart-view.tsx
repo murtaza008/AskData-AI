@@ -45,7 +45,7 @@ export function BarChartView({ data, format, measure, height, horizontal }: BarC
             tickLine={false}
             interval={0}
           />
-          <Tooltip content={tooltip} cursor={{ fill: "var(--muted)", opacity: 0.6 }} />
+          <Tooltip content={tooltip} cursor={{ fill: "var(--sunken)", opacity: 0.6 }} />
           <Bar dataKey="value" fill={PRIMARY_SERIES} radius={[0, 4, 4, 0]} maxBarSize={26} animationDuration={500} />
         </BarChart>
       </ResponsiveContainer>
@@ -65,7 +65,7 @@ export function BarChartView({ data, format, measure, height, horizontal }: BarC
           minTickGap={12}
         />
         <YAxis tick={AXIS_TICK} tickFormatter={tickFormatter} axisLine={false} tickLine={false} width={56} />
-        <Tooltip content={tooltip} cursor={{ fill: "var(--muted)", opacity: 0.6 }} />
+        <Tooltip content={tooltip} cursor={{ fill: "var(--sunken)", opacity: 0.6 }} />
         <Bar dataKey="value" fill={PRIMARY_SERIES} radius={[4, 4, 0, 0]} maxBarSize={44} animationDuration={500} />
       </BarChart>
     </ResponsiveContainer>

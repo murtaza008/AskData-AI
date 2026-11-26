@@ -1,5 +1,6 @@
 "use client";
 
+import { Cpu } from "lucide-react";
 import { useModels } from "@/features/chat/hooks/use-models";
 import { PROVIDERS } from "@/lib/models";
 
@@ -11,15 +12,16 @@ export function ModelPicker() {
   const { models, selected, select, isLoading } = useModels();
 
   return (
-    <label className="block">
-      <span className="label-caps mb-1 block">Model</span>
+    <label className="relative inline-flex items-center">
+      <span className="sr-only">AI model</span>
+      <Cpu aria-hidden className="pointer-events-none absolute left-2 size-3.5 text-fg-subtle" strokeWidth={1.75} />
       <select
         value={selected ?? ""}
         onChange={(event) => select(event.target.value)}
         disabled={isLoading || models.length === 0}
-        className="w-full rounded-md border bg-card px-2 py-1.5 text-[13px] disabled:opacity-60"
+        className="h-7 appearance-none rounded-sm border bg-surface py-0 pl-7 pr-3 text-[12.5px] text-fg-muted hover:border-border-strong hover:text-fg disabled:opacity-60"
       >
-        {isLoading && <option value="">Loading…</option>}
+        {isLoading && <option value="">Loading models…</option>}
         {!isLoading && models.length === 0 && <option value="">No provider configured</option>}
         {PROVIDERS.map((provider) => {
           const group = models.filter((model) => model.provider === provider);

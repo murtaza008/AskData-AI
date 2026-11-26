@@ -25,7 +25,7 @@ function KpiTile({ kpi, className }: { kpi: Kpi; className?: string }) {
   const Icon = change.direction === "up" ? ArrowUpRight : change.direction === "down" ? ArrowDownRight : Minus;
   return (
     <div className={cn("animate-rise px-4 py-5", className)}>
-      <div className="label-caps">{kpi.label}</div>
+      <div className="eyebrow">{kpi.label}</div>
       <CountUp
         value={kpi.value}
         format={(value) => formatValue(kpi.format === "number" ? Math.round(value) : value, kpi.format)}
@@ -35,14 +35,14 @@ function KpiTile({ kpi, className }: { kpi: Kpi; className?: string }) {
         <Icon
           className={cn(
             "size-3.5",
-            change.direction === "up" && "text-success",
-            change.direction === "down" && "text-destructive",
-            change.direction === "flat" && "text-muted-foreground",
+            change.direction === "up" && "text-success-text",
+            change.direction === "down" && "text-danger-text",
+            change.direction === "flat" && "text-fg-muted",
           )}
           strokeWidth={2}
         />
         <span className="num">{change.text}</span>
-        <span className="text-muted-foreground">vs prior 30 days</span>
+        <span className="text-fg-muted">vs prior 30 days</span>
       </div>
     </div>
   );
@@ -53,7 +53,7 @@ export function KpiStrip() {
   const { data, isLoading, isError } = useOverview();
 
   if (isError) {
-    return <p className="border-y py-5 text-[14px] text-muted-foreground">Key metrics are unavailable right now.</p>;
+    return <p className="border-y py-5 text-[14px] text-fg-muted">Key metrics are unavailable right now.</p>;
   }
 
   if (isLoading || !data) {
@@ -61,9 +61,9 @@ export function KpiStrip() {
       <div className="grid grid-cols-2 border-y lg:grid-cols-4" aria-hidden>
         {[0, 1, 2, 3].map((index) => (
           <div key={index} className="space-y-3 px-4 py-5">
-            <div className="h-2.5 w-20 animate-pulse rounded-sm bg-muted" />
-            <div className="h-7 w-28 animate-pulse rounded-sm bg-muted" />
-            <div className="h-2.5 w-32 animate-pulse rounded-sm bg-muted" />
+            <div className="h-2.5 w-20 animate-pulse rounded-sm bg-sunken" />
+            <div className="h-7 w-28 animate-pulse rounded-sm bg-sunken" />
+            <div className="h-2.5 w-32 animate-pulse rounded-sm bg-sunken" />
           </div>
         ))}
       </div>

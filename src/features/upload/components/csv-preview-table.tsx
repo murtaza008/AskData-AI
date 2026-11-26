@@ -23,7 +23,7 @@ export function CsvPreviewTable({ columns, rows, onTypeChange, disabled }: CsvPr
                 scope="col"
                 className={cn("px-4 py-2.5 align-top font-normal", column.type === "number" ? "text-right" : "text-left")}
               >
-                <div className="num text-[12px] font-medium text-foreground" title={`In the file: "${column.originalName}"`}>
+                <div className="num text-[12px] font-medium text-fg" title={`In the file: "${column.originalName}"`}>
                   {column.name}
                 </div>
                 <select
@@ -31,7 +31,7 @@ export function CsvPreviewTable({ columns, rows, onTypeChange, disabled }: CsvPr
                   disabled={disabled}
                   aria-label={`Type of column ${column.name}`}
                   onChange={(event) => onTypeChange(column.name, event.target.value as UploadColumnType)}
-                  className="mt-1 rounded-full border bg-card px-1.5 py-px text-[11px] text-muted-foreground hover:border-primary"
+                  className="mt-1 rounded-full border bg-surface px-1.5 py-px text-[11px] text-fg-muted hover:border-border-strong"
                 >
                   {UPLOAD_COLUMN_TYPES.map((type) => (
                     <option key={type} value={type}>

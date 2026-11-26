@@ -3,13 +3,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiClientError, errorMessageFrom } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
-import type { UploadColumnType, UploadDTO, UploadsResponse } from "@/lib/uploads/types";
+import { q } from "@/lib/queries";
+import type { UploadColumnType, UploadDTO } from "@/lib/uploads/types";
 
 export function useUploads() {
-  return useQuery({
-    queryKey: queryKeys.uploads,
-    queryFn: () => api<UploadsResponse>("/api/uploads"),
-  });
+  return useQuery(q.uploads());
 }
 
 /** After an upload changes, the agent's view of the data source changes too. */

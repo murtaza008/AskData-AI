@@ -31,15 +31,15 @@ export function LineChartView({ data, format, measure, height }: LineChartViewPr
         />
         <Tooltip
           content={<ChartTooltip format={format} measure={measure} />}
-          cursor={{ stroke: "var(--muted-foreground)", strokeDasharray: "3 3" }}
+          cursor={{ stroke: "var(--fg-muted)", strokeDasharray: "3 3" }}
         />
         <Line
           type="monotone"
           dataKey="value"
           stroke={PRIMARY_SERIES}
           strokeWidth={2}
-          dot={showDots ? { r: 3, fill: PRIMARY_SERIES, stroke: "var(--card)", strokeWidth: 2 } : false}
-          activeDot={{ r: 5, fill: PRIMARY_SERIES, stroke: "var(--card)", strokeWidth: 2 }}
+          dot={showDots ? { r: 3, fill: PRIMARY_SERIES, stroke: "var(--surface)", strokeWidth: 2 } : false}
+          activeDot={{ r: 5, fill: PRIMARY_SERIES, stroke: "var(--surface)", strokeWidth: 2 }}
           animationDuration={500}
         />
       </LineChart>

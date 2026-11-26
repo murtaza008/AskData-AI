@@ -27,6 +27,19 @@ export async function requireUser(): Promise<SessionUser> {
   return { id: user.id, email: user.email ?? "", name: user.name ?? "", isDemo: user.isDemo };
 }
 
+/**
+ * The shared demo account keeps its seeded examples for the next visitor, so
+ * destructive changes (delete, rename, unpin) are refused with a 403.
+ */
+export function forbidInDemo(user: SessionUser, action: string): void {
+  if (user.isDemo) {
+    throw new ApiError(
+      403,
+      `The shared demo account can't ${action}, so the examples stay in place for the next visitor. Create a free account to manage your own.`,
+    );
+  }
+}
+
 /** Parse a JSON request body against a zod schema, or throw a 400. */
 export async function parseJson<T>(request: Request, schema: z.ZodType<T>): Promise<T> {
   let body: unknown;

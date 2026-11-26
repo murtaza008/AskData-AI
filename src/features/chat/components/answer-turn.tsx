@@ -27,7 +27,7 @@ export function AnswerTurn({ turn, isLatest, onAsk, disabled }: AnswerTurnProps)
       <UserQuestion text={question} />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <StepTrace steps={answer.steps} durationMs={answer.durationMs} />
-        <span className="label-caps">{modelLabel(answer.model)}</span>
+        <span className="eyebrow">{modelLabel(answer.model)}</span>
       </div>
 
       {answer.status === "answered" ? (
@@ -35,7 +35,7 @@ export function AnswerTurn({ turn, isLatest, onAsk, disabled }: AnswerTurnProps)
       ) : (
         // The honest "I can't answer that from this data" path.
         <Notice tone="error" title="I couldn't answer that from this data">
-          <InsightText text={answer.insight} className="text-[14px] leading-[1.6] text-muted-foreground" />
+          <InsightText text={answer.insight} className="text-[14px] leading-[1.6] text-fg-muted" />
         </Notice>
       )}
 

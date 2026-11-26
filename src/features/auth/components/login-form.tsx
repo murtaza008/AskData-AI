@@ -27,7 +27,7 @@ export function LoginForm() {
   return (
     <>
       <h1 className="text-[28px]">Log in</h1>
-      <p className="mt-1 text-[14px] text-muted-foreground">Use the demo account, or your own.</p>
+      <p className="mt-1 text-[14px] text-fg-muted">Use the demo account, or your own.</p>
 
       <div className="mt-6">
         <DemoCredentials onUse={continueWithDemo} isPending={isPending} />
@@ -53,7 +53,7 @@ export function LoginForm() {
           onChange={(event) => setPassword(event.target.value)}
         />
         {error && (
-          <p role="alert" className="text-[13px] text-destructive">
+          <p role="alert" className="text-[13px] text-danger-text">
             {error}
           </p>
         )}
@@ -62,13 +62,13 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <p className="mt-6 text-[14px] text-muted-foreground">
+      <p className="mt-6 text-[14px] text-fg-muted">
         No account?{" "}
-        <Link href="/signup" className="font-medium text-foreground hover:underline">
+        <Link href="/signup" className="font-medium text-fg hover:underline">
           Sign up
         </Link>
         <span className="mx-2">·</span>
-        <Link href="/" className="hover:text-foreground">
+        <Link href="/" className="hover:text-fg">
           Back to site
         </Link>
       </p>

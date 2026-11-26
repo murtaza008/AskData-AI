@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateSelect, withRowLimit, type AllowedTable } from "@/server/sql/validate";
+import { validateSelect, withRowLimit, type AllowedTable } from "@/lib/sql/validate";
 
 const allowed: AllowedTable[] = [
   { schema: "analytics", name: "customers" },

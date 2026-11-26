@@ -22,13 +22,13 @@ export const GRID_STROKE = "var(--chart-grid)";
 export const AXIS_STROKE = "var(--border)";
 
 export const AXIS_TICK = {
-  fill: "var(--muted-foreground)",
+  fill: "var(--fg-muted)",
   fontSize: 12,
   fontFamily: "var(--font-mono)",
 } as const;
 
 export const CATEGORY_TICK = {
-  fill: "var(--foreground)",
+  fill: "var(--fg)",
   fontSize: 13,
   fontFamily: "var(--font-sans)",
 } as const;

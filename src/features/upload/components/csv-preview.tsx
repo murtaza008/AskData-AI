@@ -21,10 +21,10 @@ export function CsvPreview({ preview, onTypeChange, onCancel, onConfirm, isUploa
   const { file, columns, sampleRows, rowCount } = preview;
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded-md border bg-card px-4 py-3">
+      <div className="flex flex-wrap items-center gap-3 rounded-md border bg-surface px-4 py-3">
         <FileText className="size-4 shrink-0" strokeWidth={1.5} />
         <span className="min-w-0 truncate font-medium">{file.name}</span>
-        <span className="num text-[12px] text-muted-foreground">
+        <span className="num text-[12px] text-fg-muted">
           {formatCount(rowCount)} rows · {columns.length} columns · {formatBytes(file.size)}
         </span>
         <IconButton label="Remove file" className="ml-auto" onClick={onCancel} disabled={isUploading}>
@@ -32,10 +32,10 @@ export function CsvPreview({ preview, onTypeChange, onCancel, onConfirm, isUploa
         </IconButton>
       </div>
 
-      <section className="rounded-lg border bg-card">
+      <section className="rounded-lg border bg-surface">
         <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5">
           <h2 className="text-[15px]">Preview · first {sampleRows.length} rows</h2>
-          <span className="text-[12px] text-muted-foreground">Types were detected automatically. Change any that look wrong.</span>
+          <span className="text-[12px] text-fg-muted">Types were detected automatically. Change any that look wrong.</span>
         </header>
         <CsvPreviewTable columns={columns} rows={sampleRows} onTypeChange={onTypeChange} disabled={isUploading} />
       </section>

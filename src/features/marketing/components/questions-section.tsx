@@ -11,7 +11,7 @@ export function QuestionsSection() {
       <div className="mx-auto max-w-[1200px] px-4 py-20 sm:px-6">
         <Reveal className="flex items-baseline justify-between gap-4">
           <h2 className="text-[28px]">Questions people ask</h2>
-          <span className="label-caps hidden sm:block">Click to run in the demo</span>
+          <span className="eyebrow hidden sm:block">Click to run in the demo</span>
         </Reveal>
         <Stagger step={0.05} className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {SUGGESTED_QUESTIONS.map((question, index) => (
@@ -20,14 +20,14 @@ export function QuestionsSection() {
                 // Signed-out visitors are sent to the login page first and returned here.
                 href={`/app?q=${encodeURIComponent(question)}`}
                 prefetch={false}
-                className="group flex h-full items-start gap-3 rounded-md border bg-card px-4 py-3 font-mono text-[13px] transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:shadow-pop"
+                className="group flex h-full items-start gap-3 rounded-md border bg-surface px-4 py-3 font-mono text-[13px] transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[var(--shadow-md)]"
               >
-                <span className="text-muted-foreground transition-colors group-hover:text-highlight" aria-hidden>
+                <span className="text-fg-muted transition-colors group-hover:text-accent-text" aria-hidden>
                   &gt;
                 </span>
                 <span className="flex-1">{question}</span>
                 <ArrowRight
-                  className="mt-0.5 size-4 shrink-0 -translate-x-1 text-muted-foreground opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
+                  className="mt-0.5 size-4 shrink-0 -translate-x-1 text-fg-muted opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
                   strokeWidth={1.5}
                 />
               </Link>

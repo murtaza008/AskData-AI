@@ -19,15 +19,15 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <aside className="hidden border-l bg-muted lg:flex lg:flex-col lg:justify-center lg:px-16">
-        <div className="label-caps">Sample answer · monthly revenue</div>
+      <aside className="hidden border-l bg-sunken lg:flex lg:flex-col lg:justify-center lg:px-16">
+        <div className="eyebrow">Sample answer · monthly revenue</div>
         <p className="mt-3 max-w-[40ch] font-display text-[26px] leading-[1.2]">
           “How has monthly revenue trended over the last 12 months?”
         </p>
-        <Reveal delay={0.15} y={18} className="mt-8 rounded-lg border bg-card p-4 shadow-pop">
+        <Reveal delay={0.15} y={18} className="mt-8 rounded-lg border bg-surface p-4 shadow-[var(--shadow-md)]">
           <DataChart spec={SAMPLE_TREND.spec} rows={SAMPLE_TREND.rows} height={260} />
         </Reveal>
-        <p className="mt-4 max-w-[46ch] text-[13px] text-muted-foreground">
+        <p className="mt-4 max-w-[46ch] text-[13px] text-fg-muted">
           Every answer comes with the chart, the rows behind it, and the exact read-only SQL that produced them.
         </p>
       </aside>

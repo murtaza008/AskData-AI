@@ -43,3 +43,9 @@ next-env.d.ts
 
 # generated prisma client
 /src/generated/
+
+# e2e output and saved sessions (the auth file is a real login cookie)
+/tests/e2e/.auth/
+/tests/e2e/.results/
+/playwright-report/
+/test-results/

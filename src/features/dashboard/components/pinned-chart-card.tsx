@@ -43,11 +43,11 @@ export function PinnedChartCard({ pin, height = 260 }: { pin: Pin; height?: numb
     });
 
   return (
-    <section className="flex min-w-0 flex-col rounded-lg border bg-card">
+    <section className="flex min-w-0 flex-col rounded-lg border bg-surface">
       <header className="flex items-start justify-between gap-3 border-b px-4 py-3">
         <div className="min-w-0">
           <h2 className="truncate text-[16px]">{pin.title}</h2>
-          <p className="mt-0.5 truncate text-[13px] text-muted-foreground" title={pin.question}>
+          <p className="mt-0.5 truncate text-[13px] text-fg-muted" title={pin.question}>
             “{pin.question}”
           </p>
         </div>
@@ -69,12 +69,12 @@ export function PinnedChartCard({ pin, height = 260 }: { pin: Pin; height?: numb
         {showing === "sql" ? (
           <SqlBlock sql={pin.sql} compact />
         ) : data.isLoading ? (
-          <div className="flex h-full min-h-[180px] items-center justify-center gap-2.5 text-[13px] text-muted-foreground">
+          <div className="flex h-full min-h-[180px] items-center justify-center gap-2.5 text-[13px] text-fg-muted">
             <Spinner /> Running query…
           </div>
         ) : data.isError || !result ? (
           <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-3 text-center">
-            <p className="max-w-[40ch] text-[14px] text-muted-foreground">
+            <p className="max-w-[40ch] text-[14px] text-fg-muted">
               This chart couldn&apos;t be refreshed: {messageOf(data.error)}
             </p>
             <Button variant="outline" size="sm" onClick={() => data.refetch()}>
@@ -89,7 +89,7 @@ export function PinnedChartCard({ pin, height = 260 }: { pin: Pin; height?: numb
       </div>
 
       {result && (
-        <footer className="num border-t px-4 py-2 text-[12px] text-muted-foreground">
+        <footer className="num border-t px-4 py-2 text-[12px] text-fg-muted">
           {data.isFetching ? "Refreshing…" : `Live query · refreshed ${formatRelative(result.refreshedAt)}`}
         </footer>
       )}

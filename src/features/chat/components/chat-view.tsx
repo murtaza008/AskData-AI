@@ -83,7 +83,7 @@ export function ChatView({ conversationId, initialQuestion }: ChatViewProps) {
           )}
 
           {conversationId && conversation.isLoading ? (
-            <div className="flex items-center gap-2.5 pt-10 text-[14px] text-muted-foreground">
+            <div className="flex items-center gap-2.5 pt-10 text-[14px] text-fg-muted">
               <Spinner /> Loading conversation…
             </div>
           ) : conversationId && conversation.isError ? (

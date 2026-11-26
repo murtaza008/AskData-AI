@@ -23,7 +23,7 @@ export function ResultPanel({ question, answer }: ResultPanelProps) {
   const plottable = isPlottable(answer.chart, answer.rows);
 
   return (
-    <section className="animate-rise rounded-lg border bg-card">
+    <section className="animate-rise rounded-lg border bg-surface">
       <header className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5">
         <h3 className="min-w-0 text-[15px]">{answer.chart.title}</h3>
         <div className="flex items-center gap-1">

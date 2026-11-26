@@ -22,7 +22,7 @@ export function DataTable({ columns, rows, truncated }: DataTableProps) {
   const hidden = rows.length - visible.length;
 
   if (rows.length === 0) {
-    return <p className="py-6 text-center text-[14px] text-muted-foreground">The query returned no rows.</p>;
+    return <p className="py-6 text-center text-[14px] text-fg-muted">The query returned no rows.</p>;
   }
 
   return (
@@ -36,7 +36,7 @@ export function DataTable({ columns, rows, truncated }: DataTableProps) {
                   key={column.name}
                   scope="col"
                   className={cn(
-                    "label-caps sticky top-0 whitespace-nowrap border-b bg-card py-2 pr-5 last:pr-0",
+                    "eyebrow sticky top-0 whitespace-nowrap border-b bg-surface py-2 pr-5 last:pr-0",
                     column.kind === "number" ? "text-right" : "text-left",
                   )}
                 >
@@ -47,7 +47,7 @@ export function DataTable({ columns, rows, truncated }: DataTableProps) {
           </thead>
           <tbody>
             {visible.map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-muted/50">
+              <tr key={rowIndex} className="hover:bg-sunken/50">
                 {columns.map((column) => (
                   <td
                     key={column.name}
@@ -67,7 +67,7 @@ export function DataTable({ columns, rows, truncated }: DataTableProps) {
         </table>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[12px] text-muted-foreground">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[12px] text-fg-muted">
         <span className="num">
           {formatCount(rows.length)} {rows.length === 1 ? "row" : "rows"}
           {truncated && " · result capped by the row limit"}
@@ -76,7 +76,7 @@ export function DataTable({ columns, rows, truncated }: DataTableProps) {
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="font-medium text-foreground underline-offset-2 hover:underline"
+            className="font-medium text-fg underline-offset-2 hover:underline"
           >
             {expanded ? "Show fewer" : `Show all ${formatCount(rows.length)} rows`}
           </button>

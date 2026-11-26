@@ -6,7 +6,7 @@ import { SITE } from "@/lib/site";
 
 export function CtaBanner() {
   return (
-    <section className="border-t bg-primary text-primary-foreground">
+    <section className="border-t bg-accent text-accent-fg">
       <Reveal className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-6 px-4 py-12 sm:px-6">
         <p className="max-w-[26ch] font-display text-[28px] font-medium leading-[1.15]">
           See it answer a real question against a live database.
@@ -14,7 +14,7 @@ export function CtaBanner() {
         <Pressable>
           <Link
             href="/login?demo=1"
-            className="group inline-flex items-center gap-2 rounded-md bg-background px-5 py-2.5 text-[14px] font-medium text-foreground transition-colors hover:bg-muted"
+            className="group inline-flex items-center gap-2 rounded-md bg-bg px-5 py-2.5 text-[14px] font-medium text-fg transition-colors hover:bg-sunken"
           >
             Open the demo
             <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={1.5} />
@@ -28,14 +28,14 @@ export function CtaBanner() {
 export function SiteFooter() {
   return (
     <footer className="border-t">
-      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-4 py-8 text-[13px] text-muted-foreground sm:px-6">
+      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-4 px-4 py-8 text-[13px] text-fg-muted sm:px-6">
         <Wordmark />
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <a
             href={SITE.githubUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+            className="inline-flex items-center gap-1.5 transition-colors hover:text-fg"
           >
             <Code2 className="size-4" strokeWidth={1.5} />
             Source code
@@ -46,7 +46,7 @@ export function SiteFooter() {
               href={SITE.authorUrl}
               target="_blank"
               rel="noreferrer"
-              className="font-medium text-foreground underline-offset-2 hover:underline"
+              className="font-medium text-fg underline-offset-2 hover:underline"
             >
               {SITE.author}
             </a>

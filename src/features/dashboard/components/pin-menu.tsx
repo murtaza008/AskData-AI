@@ -34,7 +34,7 @@ export function PinMenu({ items }: { items: PinMenuItem[] }) {
         <MoreHorizontal className="size-4" strokeWidth={1.5} />
       </IconButton>
       {open && (
-        <div role="menu" className="absolute right-0 z-10 mt-1 w-40 rounded-md border bg-popover py-1 text-[13px] shadow-pop">
+        <div role="menu" className="absolute right-0 z-10 mt-1 w-40 rounded-md border bg-surface py-1 text-[13px] shadow-[var(--shadow-md)]">
           {items.map((item) => (
             <button
               key={item.label}
@@ -44,7 +44,7 @@ export function PinMenu({ items }: { items: PinMenuItem[] }) {
                 setOpen(false);
                 item.onSelect();
               }}
-              className={cn("block w-full px-3 py-1.5 text-left hover:bg-muted", item.danger && "text-destructive")}
+              className={cn("block w-full px-3 py-1.5 text-left hover:bg-sunken", item.danger && "text-danger-text")}
             >
               {item.label}
             </button>

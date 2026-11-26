@@ -41,7 +41,7 @@ export function UploadView() {
     <div className="flex-1 overflow-y-auto">
       <div className="mx-auto max-w-[1000px] px-4 py-8 sm:px-6">
         <h1 className="text-[28px]">Upload data</h1>
-        <p className="mt-1 max-w-[62ch] text-[14px] text-muted-foreground">
+        <p className="mt-1 max-w-[62ch] text-[14px] text-fg-muted">
           Add a CSV as a private table and ask questions about it. Uploaded tables are visible only to you, are queried
           with the same read-only safety rules as the demo data
           {limits ? `, and are deleted after ${limits.ttlDays} days` : ""}.
@@ -87,7 +87,7 @@ export function UploadView() {
 
         <h2 className="mb-3 mt-12 text-[20px]">Your tables</h2>
         {uploads.isLoading ? (
-          <div className="h-16 animate-pulse rounded-lg border bg-card" aria-hidden />
+          <div className="h-16 animate-pulse rounded-lg border bg-surface" aria-hidden />
         ) : uploads.isError ? (
           <Notice tone="error" title="Your uploads couldn't be loaded">
             {messageOf(uploads.error)}

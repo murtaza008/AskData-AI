@@ -55,7 +55,7 @@ export function SignupForm() {
   return (
     <>
       <h1 className="text-[28px]">Create an account</h1>
-      <p className="mt-1 text-[14px] text-muted-foreground">
+      <p className="mt-1 text-[14px] text-fg-muted">
         Free. You get your own conversations, dashboard and CSV uploads.
       </p>
 
@@ -81,7 +81,7 @@ export function SignupForm() {
           hint="At least 8 characters."
         />
         {message && (
-          <p role="alert" className="text-[13px] text-destructive">
+          <p role="alert" className="text-[13px] text-danger-text">
             {message}
           </p>
         )}
@@ -90,9 +90,9 @@ export function SignupForm() {
         </Button>
       </form>
 
-      <p className="mt-6 text-[14px] text-muted-foreground">
+      <p className="mt-6 text-[14px] text-fg-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-foreground hover:underline">
+        <Link href="/login" className="font-medium text-fg hover:underline">
           Log in
         </Link>
       </p>

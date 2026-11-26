@@ -34,13 +34,13 @@ export function CsvDropzone({ onFile, isParsing, limits, disabled }: CsvDropzone
       onDrop={onDrop}
       className={cn(
         "flex flex-col items-center justify-center rounded-lg border-2 border-dashed px-6 py-14 text-center transition-colors",
-        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-primary",
-        dragging ? "border-primary bg-card" : "bg-card/50",
+        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-border-strong",
+        dragging ? "border-border-strong bg-surface" : "bg-surface/50",
         // The real input is visually hidden; show its focus ring on the label.
-        "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-ring",
+        "focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus",
       )}
     >
-      {isParsing ? <Spinner className="size-5" /> : <UploadCloud className="size-6 text-muted-foreground" strokeWidth={1.5} />}
+      {isParsing ? <Spinner className="size-5" /> : <UploadCloud className="size-6 text-fg-muted" strokeWidth={1.5} />}
       <p className="mt-3 text-[15px]">
         {isParsing ? (
           "Reading file…"
@@ -51,7 +51,7 @@ export function CsvDropzone({ onFile, isParsing, limits, disabled }: CsvDropzone
         )}
       </p>
       {limits && (
-        <p className="num mt-2 text-[12px] text-muted-foreground">
+        <p className="num mt-2 text-[12px] text-fg-muted">
           .csv · header row required · max {Math.round(limits.maxBytes / 1024 / 1024)} MB ·{" "}
           {limits.maxRows.toLocaleString("en-US")} rows
         </p>

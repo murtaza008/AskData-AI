@@ -1,121 +1,213 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * AskData design tokens.
+ * Every colour is a CSS variable with a light and a dark value; utilities read
+ * the variable, so one class works in both themes. Pairs are checked for WCAG
+ * AA by `npm run check:contrast` (scripts/check-contrast.mjs reads the two
+ * marked blocks below), and the chart order by the colour-blind validator.
+ */
 @theme inline {
-  --font-display: var(--font-newsreader), Georgia, serif;
-  --font-sans: var(--font-franklin), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-display: var(--font-archivo), "Arial Narrow", system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
-  --radius-sm: 3px;
-  --radius-md: 4px;
-  --radius-lg: 6px;
-  --radius-xl: 6px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-popover: var(--popover);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-highlight: var(--highlight);
-  --color-highlight-soft: var(--highlight-soft);
-  --color-destructive: var(--destructive);
-  --color-success: var(--success);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-sunken: var(--sunken);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
   --color-border: var(--border);
-  --color-ring: var(--ring);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-text: var(--danger-text);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-fg: var(--danger-fg);
+  --color-success: var(--success);
+  --color-success-text: var(--success-text);
+  --color-success-soft: var(--success-soft);
+  --color-focus: var(--focus);
+  --color-inverse: var(--inverse);
+  --color-inverse-fg: var(--inverse-fg);
+  --color-inverse-muted: var(--inverse-muted);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-other: var(--chart-other);
+  --color-chart-grid: var(--chart-grid);
   --color-sql-keyword: var(--sql-keyword);
   --color-sql-string: var(--sql-string);
   --color-sql-number: var(--sql-number);
   --color-sql-fn: var(--sql-fn);
 }
 
-/* Warm paper + ink editorial theme. */
+/* tokens:light */
 :root {
-  --background: oklch(0.955 0.012 80);
-  --foreground: oklch(0.2 0.008 60);
-  --card: oklch(0.985 0.006 85);
-  --popover: oklch(0.985 0.006 85);
-  --primary: oklch(0.22 0.01 60);
-  --primary-hover: oklch(0.32 0.01 60);
-  --primary-foreground: oklch(0.97 0.01 85);
-  --muted: oklch(0.92 0.014 80);
-  --muted-foreground: oklch(0.45 0.012 60);
-  --highlight: oklch(0.55 0.18 33);
-  --highlight-soft: oklch(0.62 0.17 33 / 0.12);
-  --destructive: oklch(0.52 0.19 28);
-  --success: oklch(0.45 0.1 150);
-  --border: oklch(0.86 0.016 75);
-  --ring: oklch(0.55 0.18 33);
-  --sql-keyword: oklch(0.34 0.07 255);
-  --sql-string: oklch(0.55 0.18 33);
-  --sql-number: oklch(0.5 0.1 150);
-  --sql-fn: oklch(0.55 0.12 70);
-  --shadow-pop: 0 8px 24px -12px oklch(0.2 0.01 60 / 0.2);
+  --bg: #f3f3f5;
+  --surface: #ffffff;
+  --surface-2: #f9f9fa;
+  --sunken: #eaeaee;
+  --fg: #16161d;
+  --fg-muted: #4b4b56;
+  --fg-subtle: #5f5f6a;
+  --border: #dedee4;
+  --border-strong: #b9b9c3;
+  --accent: #9c2468;
+  --accent-hover: #841b57;
+  --accent-fg: #ffffff;
+  --accent-text: #9c2468;
+  --accent-soft: #f7e7f0;
+  --danger: #c2371a;
+  --danger-text: #ae2f14;
+  --danger-soft: #fcebe5;
+  --danger-fg: #ffffff;
+  --success: #1d7a43;
+  --success-text: #186b3a;
+  --success-soft: #e3f3e9;
+  --focus: #9c2468;
+  --inverse: #16161d;
+  --inverse-fg: #f3f3f5;
+  --inverse-muted: #a6a6b1;
+  --chart-1: #9c2468;
+  --chart-2: #2a78d6;
+  --chart-3: #c98500;
+  --chart-4: #148f68;
+  --chart-5: #6250d6;
+  --chart-other: #83838d;
+  --chart-grid: #e7e7ec;
+  --sql-keyword: #8e1f5e;
+  --sql-string: #186b3a;
+  --sql-number: #2559a8;
+  --sql-fn: #7a5200;
+}
 
-  /* Chart series: a categorical palette validated for colour-vision
-     deficiency and contrast in each theme. Assigned in fixed order. */
-  --chart-1: #2a78d6;
-  --chart-2: #eb6834;
-  --chart-3: #1baf7a;
-  --chart-4: #eda100;
-  --chart-5: #e87ba4;
-  --chart-6: #008300;
-  --chart-7: #6250d6;
-  --chart-8: #e34948;
-  --chart-grid: oklch(0.89 0.012 75);
+/* tokens:dark */
+.dark {
+  --bg: #0e0e11;
+  --surface: #16161a;
+  --surface-2: #1c1c21;
+  --sunken: #0a0a0c;
+  --fg: #ededf2;
+  --fg-muted: #ababb7;
+  --fg-subtle: #90909c;
+  --border: #2a2a31;
+  --border-strong: #464650;
+  --accent: #ee8cc3;
+  --accent-hover: #f5a9d3;
+  --accent-fg: #22091a;
+  --accent-text: #f19ccb;
+  --accent-soft: #3a1a2c;
+  --danger: #ff7d5e;
+  --danger-text: #ff917a;
+  --danger-soft: #3a1912;
+  --danger-fg: #1f0a05;
+  --success: #57c886;
+  --success-text: #6dd497;
+  --success-soft: #122c1d;
+  --focus: #ee8cc3;
+  --inverse: #ededf2;
+  --inverse-fg: #16161d;
+  --inverse-muted: #55555f;
+  --chart-1: #d6589f;
+  --chart-2: #3987e5;
+  --chart-3: #c98500;
+  --chart-4: #199e70;
+  --chart-5: #9085e9;
+  --chart-other: #7c7c87;
+  --chart-grid: #24242a;
+  --sql-keyword: #f19ccb;
+  --sql-string: #74d39c;
+  --sql-number: #8ab8f5;
+  --sql-fn: #e7b955;
+}
+
+:root {
+  color-scheme: light;
+  /* Inset top highlight: only visible in dark mode, where depth needs light. */
+  --highlight: transparent;
+  --shadow-xs: 0 1px 2px rgb(22 22 29 / 0.06);
+  --shadow-sm: 0 1px 2px rgb(22 22 29 / 0.05), 0 2px 6px -2px rgb(22 22 29 / 0.08);
+  --shadow-md: 0 1px 2px rgb(22 22 29 / 0.05), 0 12px 28px -12px rgb(22 22 29 / 0.22);
+  --shadow-lg: 0 2px 4px rgb(22 22 29 / 0.05), 0 24px 56px -20px rgb(22 22 29 / 0.32);
+  --overlay: rgb(14 14 17 / 0.42);
 }
 
 .dark {
-  --background: oklch(0.18 0.006 60);
-  --foreground: oklch(0.93 0.012 85);
-  --card: oklch(0.22 0.007 60);
-  --popover: oklch(0.22 0.007 60);
-  --primary: oklch(0.93 0.012 85);
-  --primary-hover: oklch(0.85 0.012 85);
-  --primary-foreground: oklch(0.18 0.006 60);
-  --muted: oklch(0.26 0.008 60);
-  --muted-foreground: oklch(0.72 0.012 70);
-  --highlight: oklch(0.7 0.16 35);
-  --highlight-soft: oklch(0.7 0.16 35 / 0.15);
-  --destructive: oklch(0.68 0.17 28);
-  --success: oklch(0.7 0.12 150);
-  --border: oklch(0.32 0.008 60);
-  --ring: oklch(0.7 0.16 35);
-  --sql-keyword: oklch(0.75 0.08 245);
-  --sql-string: oklch(0.72 0.15 35);
-  --sql-number: oklch(0.72 0.1 150);
-  --sql-fn: oklch(0.78 0.11 80);
-  --shadow-pop: 0 8px 24px -12px oklch(0 0 0 / 0.6);
+  color-scheme: dark;
+  --highlight: rgb(255 255 255 / 0.06);
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4), 0 2px 6px -2px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 28px -12px rgb(0 0 0 / 0.7);
+  --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.4), 0 24px 56px -20px rgb(0 0 0 / 0.8);
+  --overlay: rgb(0 0 0 / 0.62);
+}
 
-  --chart-1: #3987e5;
-  --chart-2: #d95926;
-  --chart-3: #199e70;
-  --chart-4: #c98500;
-  --chart-5: #d55181;
-  --chart-6: #008300;
-  --chart-7: #9085e9;
-  --chart-8: #e66767;
-  --chart-grid: oklch(0.29 0.008 60);
+/* Printed pages always use the light palette. */
+@media print {
+  .dark {
+    color-scheme: light;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --sunken: #f3f3f5;
+    --fg: #16161d;
+    --fg-muted: #4b4b56;
+    --fg-subtle: #5f5f6a;
+    --border: #dedee4;
+    --border-strong: #b9b9c3;
+    --accent: #9c2468;
+    --accent-text: #9c2468;
+    --accent-soft: #f7e7f0;
+    --danger-text: #ae2f14;
+    --success-text: #186b3a;
+    --chart-1: #9c2468;
+    --chart-2: #2a78d6;
+    --chart-3: #c98500;
+    --chart-4: #148f68;
+    --chart-5: #6250d6;
+    --chart-other: #83838d;
+    --chart-grid: #e7e7ec;
+    --sql-keyword: #8e1f5e;
+    --sql-string: #186b3a;
+    --sql-number: #2559a8;
+    --sql-fn: #7a5200;
+    --highlight: transparent;
+  }
+  .no-print {
+    display: none !important;
+  }
 }
 
 @layer base {
   * {
-    border-color: var(--color-border);
+    border-color: var(--border);
   }
   html {
     -webkit-font-smoothing: antialiased;
-    color-scheme: light;
-  }
-  html.dark {
-    color-scheme: dark;
+    text-rendering: optimizeLegibility;
   }
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--bg);
+    color: var(--fg);
     font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.55;
@@ -125,9 +217,10 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 500;
-    letter-spacing: -0.015em;
-    line-height: 1.1;
+    font-weight: 600;
+    font-stretch: 112%;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
     text-wrap: balance;
   }
   button:not(:disabled),
@@ -136,22 +229,51 @@
     cursor: pointer;
   }
   :focus-visible {
-    outline: 2px solid var(--color-ring);
+    outline: 2px solid var(--focus);
     outline-offset: 2px;
   }
   ::selection {
-    background: var(--highlight-soft);
+    background: var(--accent-soft);
+    color: var(--fg);
+  }
+  /* Links inside running text are always underlined. */
+  .prose-links a,
+  p a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 }
 
+/* ---------- surfaces ---------- */
+
+/* A card: 1px border, layered surface, subtle shadow, inset top highlight in dark. */
+@utility panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    inset 0 1px 0 var(--highlight),
+    var(--shadow-xs);
+}
+
+/* Popovers, menus, hover cards, dialogs. */
+@utility panel-raised {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    inset 0 1px 0 var(--highlight),
+    var(--shadow-lg);
+}
+
 /* Small caps label used for section and field headings. */
-@utility label-caps {
-  font-family: var(--font-sans);
+@utility eyebrow {
+  font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-muted-foreground);
+  color: var(--fg-subtle);
 }
 
 /* Monospaced, column-aligned figures. */
@@ -160,8 +282,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-@utility shadow-pop {
-  box-shadow: var(--shadow-pop);
+@utility tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 /* A key figure highlighted inside an insight sentence. */
@@ -169,40 +291,79 @@
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: 0.92em;
-  font-weight: 500;
-  color: var(--color-highlight);
-  background: var(--color-highlight-soft);
-  padding: 1px 4px;
-  border-radius: 2px;
+  font-weight: 600;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  padding: 1px 5px;
+  border-radius: 4px;
   white-space: nowrap;
 }
+
+/* Clickable cards lift slightly on hover (pointer devices only). */
+@utility lift {
+  transition:
+    transform 220ms var(--ease-out-expo),
+    box-shadow 220ms var(--ease-out-expo),
+    border-color 150ms;
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 1px 0 var(--highlight),
+        var(--shadow-md);
+      border-color: var(--border-strong);
+    }
+  }
+}
+
+/* ---------- motion ---------- */
 
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(-100%);
   }
 }
 
 @utility animate-rise {
-  animation: rise-in 0.28s ease-out both;
+  animation: rise-in 320ms var(--ease-out-expo) both;
 }
 
-/* Landing hero backdrop: faint ruled grid that drifts and fades out downward. */
-@keyframes grid-drift {
-  to {
-    background-position: 48px 48px;
-  }
+/* Staggered list entry: set --i on each item (capped at 15 by the caller). */
+@utility stagger-item {
+  animation: rise-in 360ms var(--ease-out-expo) both;
+  animation-delay: calc(min(var(--i, 0), 15) * 35ms);
 }
 
-@utility hero-grid {
-  background-image:
-    linear-gradient(to right, var(--border) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-  background-size: 48px 48px;
-  opacity: 0.45;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 20%, transparent 75%);
-  animation: grid-drift 14s linear infinite;
+@utility animate-pop {
+  animation: pop-in 180ms var(--ease-out-expo) both;
+}
+
+@utility animate-sheet {
+  animation: sheet-in 300ms var(--ease-out-expo) both;
+}
+
+@utility animate-fade {
+  animation: fade-in 200ms var(--ease-out-expo) both;
 }
 
 /* Blinking text cursor. */
@@ -221,11 +382,59 @@
   animation: caret-blink 1.1s steps(1) infinite;
 }
 
+/* Page changes: old page fades out, new one rises in (React <ViewTransition>). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(.page-out) {
+  animation: 140ms ease-out both vt-fade-out;
+}
+
+::view-transition-new(.page-in) {
+  animation: 340ms var(--ease-out-expo) 60ms both vt-rise-in;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* The theme switch reveals the new theme in a circle (see theme-toggle.tsx). */
+html[data-theme-switching]::view-transition-old(root),
+html[data-theme-switching]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-theme-switching]::view-transition-old(root) {
+  z-index: 1;
+}
+html[data-theme-switching]::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* ---------- reduced motion: everything off ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }

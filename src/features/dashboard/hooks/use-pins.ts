@@ -1,29 +1,15 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { ChartSpec, QueryResult } from "@/lib/agent/types";
 import { api } from "@/lib/api-client";
+import { type Pin, type PinData, q } from "@/lib/queries";
 import { queryKeys } from "@/lib/query-keys";
 
-export type Pin = {
-  id: string;
-  title: string;
-  question: string;
-  sql: string;
-  chart: ChartSpec;
-  createdAt: string;
-};
-
-export type PinData = QueryResult & { chart: ChartSpec; refreshedAt: string };
-
+export type { Pin, PinData } from "@/lib/queries";
 export type NewPin = Pick<Pin, "title" | "question" | "sql" | "chart">;
 
 export function usePins() {
-  return useQuery({
-    queryKey: queryKeys.pins,
-    queryFn: () => api<{ pins: Pin[] }>("/api/pins"),
-    select: (data) => data.pins,
-  });
+  return useQuery(q.pins());
 }
 
 /**

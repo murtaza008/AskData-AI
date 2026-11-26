@@ -14,7 +14,7 @@ export function SqlDisclosure({ sql }: { sql: string }) {
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-fg-muted hover:text-fg"
       >
         <ChevronRight className={cn("size-3.5 transition-transform duration-150", open && "rotate-90")} strokeWidth={1.5} />
         {open ? "Hide SQL" : "Show SQL"}

@@ -1,20 +1,15 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { TurnDTO } from "@/lib/agent/types";
 import { api } from "@/lib/api-client";
+import { type ConversationDetail, q } from "@/lib/queries";
 import { queryKeys } from "@/lib/query-keys";
 
-export type ConversationSummary = { id: string; title: string; updatedAt: string };
-export type ConversationDetail = { id: string; title: string; turns: TurnDTO[] };
+export type { ConversationDetail, ConversationSummary } from "@/lib/queries";
 
-/** Sidebar history list. */
+/** Conversation history, newest first. */
 export function useConversations() {
-  return useQuery({
-    queryKey: queryKeys.conversations,
-    queryFn: () => api<{ conversations: ConversationSummary[] }>("/api/conversations"),
-    select: (data) => data.conversations,
-  });
+  return useQuery(q.conversations());
 }
 
 /** One conversation with all of its turns. Disabled for a brand-new chat. */

@@ -20,7 +20,7 @@ export function highlightSql(sql: string): ReactNode[] {
   return tokens.map((token, index) => {
     if (!token) return null;
     if (token.startsWith("'")) return <span key={index} className="text-sql-string">{token}</span>;
-    if (token.startsWith("--")) return <span key={index} className="text-muted-foreground italic">{token}</span>;
+    if (token.startsWith("--")) return <span key={index} className="text-fg-muted italic">{token}</span>;
     if (/^\d/.test(token)) return <span key={index} className="text-sql-number">{token}</span>;
 
     const upper = token.toUpperCase();

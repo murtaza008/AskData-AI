@@ -9,27 +9,27 @@ import { cn } from "@/lib/utils";
 
 function StepIcon({ step }: { step: AgentStep }) {
   if (step.status === "running") return <Spinner />;
-  if (step.status === "error") return <X className="size-3.5 shrink-0 text-destructive" strokeWidth={2} />;
-  if (step.kind === "fix") return <RotateCcw className="size-3.5 shrink-0 text-highlight" strokeWidth={2} />;
-  return <Check className="size-3.5 shrink-0 text-success" strokeWidth={2} />;
+  if (step.status === "error") return <X className="size-3.5 shrink-0 text-danger-text" strokeWidth={2} />;
+  if (step.kind === "fix") return <RotateCcw className="size-3.5 shrink-0 text-accent-text" strokeWidth={2} />;
+  return <Check className="size-3.5 shrink-0 text-success-text" strokeWidth={2} />;
 }
 
 function StepRow({ step }: { step: AgentStep }) {
   return (
     <li className="animate-rise">
       <div className="flex items-start gap-2.5">
-        <span className="num w-12 shrink-0 pt-px text-[12px] text-muted-foreground">
+        <span className="num w-12 shrink-0 pt-px text-[12px] text-fg-muted">
           {(step.atMs / 1000).toFixed(2)}s
         </span>
         <span className="pt-[3px]">
           <StepIcon step={step} />
         </span>
-        <span className={cn("min-w-0", step.status === "error" ? "text-destructive" : "text-foreground")}>
+        <span className={cn("min-w-0", step.status === "error" ? "text-danger-text" : "text-fg")}>
           {step.label}
         </span>
       </div>
       {step.detail && (
-        <p className="ml-[82px] mt-0.5 break-words font-mono text-[12px] text-muted-foreground">{step.detail}</p>
+        <p className="ml-[82px] mt-0.5 break-words font-mono text-[12px] text-fg-muted">{step.detail}</p>
       )}
     </li>
   );
@@ -57,7 +57,7 @@ export function StepTrace({ steps, live = false, durationMs }: StepTraceProps) {
         <StepRow key={step.id} step={step} />
       ))}
       {isWaitingOnModel && (
-        <li className="flex items-center gap-2.5 text-muted-foreground">
+        <li className="flex items-center gap-2.5 text-fg-muted">
           <span className="w-12 shrink-0" />
           <Spinner />
           <span>{steps.length === 0 ? "Starting…" : "Thinking…"}</span>
@@ -75,7 +75,7 @@ export function StepTrace({ steps, live = false, durationMs }: StepTraceProps) {
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-fg-muted hover:text-fg"
       >
         <ChevronRight className={cn("size-3.5 transition-transform duration-150", open && "rotate-90")} strokeWidth={1.5} />
         <span className="num">
@@ -83,7 +83,7 @@ export function StepTrace({ steps, live = false, durationMs }: StepTraceProps) {
           {durationMs !== undefined && ` · ${formatDuration(durationMs)}`}
         </span>
         {selfCorrected && (
-          <span className="ml-1 rounded-sm border px-1.5 text-[11px] text-highlight">self-corrected</span>
+          <span className="ml-1 rounded-sm border px-1.5 text-[11px] text-accent-text">self-corrected</span>
         )}
       </button>
       {open && <div className="ml-[7px] mt-2">{list}</div>}

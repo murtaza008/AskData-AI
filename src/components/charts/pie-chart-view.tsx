@@ -30,7 +30,7 @@ export function PieChartView({ data, format, measure, height }: PieChartViewProp
               innerRadius="56%"
               outerRadius="92%"
               // A surface-coloured gap separates neighbouring slices.
-              stroke="var(--card)"
+              stroke="var(--surface)"
               strokeWidth={2}
               animationDuration={500}
             >
@@ -51,7 +51,7 @@ export function PieChartView({ data, format, measure, height }: PieChartViewProp
               style={{ background: SERIES_COLORS[index % SERIES_COLORS.length] }}
             />
             <span className="min-w-0 flex-1 truncate">{datum.label}</span>
-            <span className="num text-muted-foreground">{formatValue(datum.value, format)}</span>
+            <span className="num text-fg-muted">{formatValue(datum.value, format)}</span>
             <span className="num w-12 text-right">{total > 0 ? ((datum.value / total) * 100).toFixed(1) : "0"}%</span>
           </li>
         ))}

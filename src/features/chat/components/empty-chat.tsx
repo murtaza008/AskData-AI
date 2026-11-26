@@ -12,7 +12,7 @@ export function EmptyChat({ onAsk, disabled }: { onAsk: (question: string) => vo
         <DataSourceChip />
       </div>
 
-      <div className="label-caps mb-2 mt-10">Try asking</div>
+      <div className="eyebrow mb-2 mt-10">Try asking</div>
       <Stagger once step={0.04} className="divide-y border-y">
         {SUGGESTED_QUESTIONS.map((question) => (
           <StaggerItem key={question} y={8}>
@@ -20,11 +20,11 @@ export function EmptyChat({ onAsk, disabled }: { onAsk: (question: string) => vo
               type="button"
               disabled={disabled}
               onClick={() => onAsk(question)}
-              className="group flex w-full items-center justify-between gap-4 py-3 text-left text-[15px] transition-[color,padding] duration-200 hover:pl-2 hover:text-highlight disabled:opacity-50"
+              className="group flex w-full items-center justify-between gap-4 py-3 text-left text-[15px] transition-[color,padding] duration-200 hover:pl-2 hover:text-accent-text disabled:opacity-50"
             >
               {question}
               <ArrowUpRight
-                className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-highlight"
+                className="size-4 shrink-0 text-fg-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-accent-text"
                 strokeWidth={1.5}
               />
             </button>

@@ -13,10 +13,10 @@ export function Hero() {
       <div className="relative mx-auto grid max-w-[1200px] gap-12 px-4 pb-20 pt-14 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:gap-16 lg:pt-24">
         <Stagger step={0.08} once className="max-w-[560px]">
           <StaggerItem>
-            <div className="label-caps inline-flex items-center gap-2">
+            <div className="eyebrow inline-flex items-center gap-2">
               <span className="relative flex size-1.5">
-                <span className="absolute inline-flex size-full animate-ping rounded-full bg-highlight opacity-60" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-highlight" />
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-accent opacity-60" />
+                <span className="relative inline-flex size-1.5 rounded-full bg-accent" />
               </span>
               AI data analyst
             </div>
@@ -27,7 +27,7 @@ export function Hero() {
             </h1>
           </StaggerItem>
           <StaggerItem>
-            <p className="mt-6 max-w-[48ch] text-[17px] text-muted-foreground">
+            <p className="mt-6 max-w-[48ch] text-[17px] text-fg-muted">
               AskData writes the query, runs it read-only, and shows its work, so you can check every number.
             </p>
           </StaggerItem>
@@ -46,7 +46,7 @@ export function Hero() {
             </div>
           </StaggerItem>
           <StaggerItem>
-            <p className="mt-4 text-[13px] text-muted-foreground">No sign-up needed. A demo account is ready to use.</p>
+            <p className="mt-4 text-[13px] text-fg-muted">No sign-up needed. A demo account is ready to use.</p>
           </StaggerItem>
         </Stagger>
 
