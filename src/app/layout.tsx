@@ -1,15 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 
 // Archivo (semi-expanded) for headings, IBM Plex for text, figures and SQL.
-const archivo = Archivo({ subsets: ["latin"], variable: "--font-archivo", axes: ["wdth"], display: "swap" });
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+// The two variable fonts are local files (see app/fonts/README.md).
+const archivo = localFont({
+  src: "./fonts/archivo-latin-variable.woff2",
+  variable: "--font-archivo",
+  weight: "100 900",
+  display: "swap",
+  declarations: [{ prop: "font-stretch", value: "62% 125%" }],
+});
+const plexSans = localFont({
+  src: "./fonts/ibm-plex-sans-latin-variable.woff2",
   variable: "--font-plex-sans",
+  weight: "100 700",
   display: "swap",
 });
 const plexMono = IBM_Plex_Mono({

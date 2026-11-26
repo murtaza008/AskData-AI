@@ -107,7 +107,7 @@ test.describe("marketing", () => {
 
       await page.goto("/app/history");
       await page.getByRole("link", { name: "What were our top 5 products by revenue last month?" }).click();
-      await expect(page.getByRole("table").first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByRole("region", { name: /^Result:/ }).first()).toBeVisible({ timeout: 30_000 });
       await page.waitForLoadState("networkidle");
       await settle(page);
       await page.screenshot({ path: path.join(out, `answer-${theme}.png`) });

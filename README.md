@@ -19,23 +19,27 @@ Built to show how a text-to-SQL agent can be made **safe enough to point at a re
 database**: the model's SQL runs through a read-only Postgres role, a parser-based
 validator, a statement timeout and an enforced row limit.
 
-- **Ask** in plain English; watch the agent work step by step ("Reading schema…", "Running query…", "Fixing query…")
-- **Verify** every answer: chart (bar / line / pie, switchable), data table, collapsible SQL with copy, CSV export
+- **Ask** in plain English; watch the agent work step by step (schema read, each query, each repair)
+- **Verify** every answer: chart (bar / line / pie, switchable) or table of the same rows, the SQL that ran, CSV export
 - **Follow up**: each answer suggests next questions, and the conversation keeps context
-- **Pin** charts to a dashboard that re-runs their SQL on every load, next to a KPI strip
-- **Upload** a CSV and question it with the same safety rules
-- **Switch models**: Google Gemini by default (free tier), OpenAI and Anthropic Claude when their keys are set
-- **History**: conversations are saved, renamable and deletable; light / dark theme
+- **Dashboard**: revenue, orders, average order value and repeat rate for 7 / 30 / 90 days against the period before, breakdowns on hover, "worth a look" changes with a question to ask, and pinned charts that re-run their SQL on every load
+- **Data**: every table the agent may query, with each column's type and business rule; upload a CSV and question it with the same safety rules
+- **Resilient AI**: Google Gemini by default (free tier); a slow or busy main model hands the question to a lighter one after ~10 s; OpenAI and Anthropic Claude appear when their keys are set
+- **History, Settings, Ctrl/Cmd+K palette**, light / dark / system themes
 
-**Stack:** Next.js 16 (App Router, Cache Components) · React 19 · TypeScript · Tailwind CSS 4 ·
-Vercel AI SDK 7 · Neon Postgres · Prisma 7 · `pg` · `node-sql-parser` · Auth.js v5 ·
-TanStack Query · Recharts · zod · Vitest
+**Stack:** Next.js 16 (App Router, Cache Components, React `<ViewTransition>`) · React 19 · TypeScript (strict) ·
+Tailwind CSS 4 · Vercel AI SDK 7 · Neon Postgres · Prisma 7 · `pg` · `node-sql-parser` · Auth.js v5 ·
+TanStack Query · Radix primitives · own SVG charts · zod · Vitest · Playwright + axe
+
+![The Ask screen: a question, the agent's steps, the finding, and the chart, table and SQL behind it](public/screens/answer-light.png)
 
 ---
 
 ## Contents
 
 - [Quick start](#quick-start)
+- [Screens](#screens)
+- [Design system](#design-system)
 - [Architecture](#architecture)
 - [How the agent works](#how-the-agent-works)
 - [Safety layers](#safety-layers)
@@ -43,6 +47,7 @@ TanStack Query · Recharts · zod · Vitest
 - [CSV uploads](#csv-uploads)
 - [Evaluating accuracy](#evaluating-accuracy)
 - [Tests](#tests)
+- [Performance](#performance)
 - [Deploying to Vercel](#deploying-to-vercel)
 - [Environment variables](#environment-variables)
 - [npm scripts](#npm-scripts)
@@ -101,6 +106,54 @@ Open http://localhost:3000 and choose **Try the demo**. The demo login is
 
 ---
 
+## Screens
+
+Captured from the real app, signed in as the demo account (`npm run screens`).
+
+| | Light | Dark |
+| --- | --- | --- |
+| An answer | ![Answer, light](public/screens/answer-light.png) | ![Answer, dark](public/screens/answer-dark.png) |
+| Dashboard | ![Dashboard, light](public/screens/dashboard-light.png) | ![Dashboard, dark](public/screens/dashboard-dark.png) |
+| Data | ![Data, light](public/screens/data-light.png) | ![Data, dark](public/screens/data-dark.png) |
+
+The landing page (`/`) tells the same story in a CSS 3D scroll scene: the question,
+the demo store's five tables, the SQL, and the five result rows that turn into the
+chart's bars. Its numbers come from a read-only snapshot of the demo data
+(`npm run landing:data`), and its three demos run the app's own modules in the
+browser: the SQL validator, CSV type inference and chart-spec repair.
+
+---
+
+## Design system
+
+- **Tokens.** Every colour is a CSS variable with a light and a dark value
+  (`src/app/globals.css`), so one utility class works in both themes. One accent
+  (berry `#9c2468`, `#ee8cc3` in dark); danger is vermilion, a clearly different hue;
+  success is green and never used for the accent or for danger. Printed pages stay light.
+- **Contrast.** `npm run check:contrast` checks every text/background pair the UI uses
+  for WCAG AA (4.5:1 for text, 3:1 for icons, chart marks and focus rings) in both themes.
+- **Charts.** Small SVG components (`src/components/charts`), no chart library. One
+  y-axis; single-series charts use the accent; categorical colours follow a fixed
+  order that was run through a colour-blind separation validator in both themes, and
+  anything past the fifth series folds into "Other". Every dashboard chart has a table view.
+- **Type.** Archivo (semi-expanded) for headings, IBM Plex Sans for text, IBM Plex Mono
+  for figures and SQL.
+- **Depth.** 1px borders, layered surfaces and soft shadows, with an inset top
+  highlight in dark mode. No gradients, blur or glow.
+- **Theme.** Light, dark or system, applied before first paint (no flash). Switching
+  reveals the new theme in a circle from the toggle (View Transitions API), instantly
+  when that is unsupported or motion is reduced.
+- **Motion.** Expo-out, 150–450 ms: page changes fade out and rise in, numbers count
+  to their value (the final value is in `data-value`), lines draw in, bars grow from
+  the baseline, lists rise in staggered. Press and pin feedback run outside React and
+  only for pointer input. All of it is off with `prefers-reduced-motion`.
+- **Hover.** One `HoverCard` component: nav items say what the page is for with live
+  counts, KPIs show their breakdown (also on keyboard focus), history rows and tables
+  preview what the row already holds. Hover only adds detail; everything is reachable
+  by click and keyboard.
+
+---
+
 ## Architecture
 
 ```
@@ -155,9 +208,13 @@ Design decisions worth knowing:
   one right answer, so the server runs `getSchema` itself at the start of every run
   (it shows as the first step in the trace) and hands the result to the model. That
   saves a full model round-trip per question. The tool stays available for re-reading.
-- **Time budget and fallback.** A run has 50 seconds. If the model is overloaded
-  before any query ran, the agent restarts once on the provider's lighter model. If
-  the model fails after a query succeeded, the user still gets the chart and table.
+- **Main model, then fallback.** Each step of the main model gets about 10 seconds
+  and no silent retries. On a timeout, a 429 or a 5xx before any query has run, the
+  same request goes to the provider's lighter model (for Gemini: Flash Lite), and
+  the trace shows "Main model busy · switched to …". Any other 4xx (bad request,
+  bad key) and a cancel by the user are shown as they are, never retried.
+- **Time budget.** A run has 50 seconds in total. If the model fails after a query
+  succeeded, the user still gets the chart and table, without a written summary.
 - **The model never retypes data.** It picks a result by id; the rows shown in the
   table and chart come from the server's copy of the query result. The table and chart
   therefore cannot contain invented numbers.
@@ -358,8 +415,64 @@ npm run lint
 ```
 
 - `tests/sql-validate.test.ts`: about 50 accept/reject cases for the SQL validator
-- `tests/agent.test.ts`: the agent loop against the AI SDK's mock model: normal flow, self-repair, retry cap, honest refusal, chart repair, provider errors
+- `tests/agent.test.ts`: the agent loop against the AI SDK's mock model: normal flow, self-repair, retry cap, honest refusal, chart repair, provider errors, and the main-model fallback (busy 429, server error 503, slow step, bad request 400 not retried, user cancel)
+- `tests/api.test.ts`, `tests/overview.test.ts`: route handlers with the session and database faked: 401 signed out, 403 for the shared demo's destructive actions, 404 for another user's records, 400 for bad input, per-user scoping, the dashboard's period anchoring, and that no sample values or secrets leave the server
 - `tests/lib.test.ts`: chart-spec resolution, CSV type inference, CSV export escaping, callback URL validation
+
+### End-to-end (Playwright + axe)
+
+```bash
+npm run build
+npm run test:e2e        # starts `next start` on port 3200 itself
+npm run verify          # contrast, lint, types, unit, build, e2e in one go
+```
+
+The e2e suite signs in as the shared demo account against the database in `.env`
+and is **strictly read-only**: `POST /api/chat` is always answered by a mock (success,
+busy, bad request, a streamed provider error, a request the user stops), creating a pin
+is mocked, and nothing else writes. It covers:
+
+- an axe WCAG 2.1 AA scan of every page and of every menu, dialog, drawer and hover
+  card, in light and dark, after animations finish
+- no page scrolls sideways at 390 px; the landing page logs no console errors
+  (hydration mismatches show up there); the story's still picture works without JavaScript
+- the landing demos running the real validator, type inference and chart repair
+- navigation, the command palette, the dashboard's periods and table views, the Ask
+  flow end to end, and what the demo account is not allowed to do
+
+Two workers and one retry, because every app page waits on a remote database.
+`tests/e2e/.auth/` (a real session cookie) and `tests/e2e/.results/` are git-ignored.
+
+---
+
+## Performance
+
+First-load JavaScript per route (gzip), measured from the HTML of a production
+server with `npm run bundle:report` (signed-in routes as the demo account). Lazy
+chunks are not counted: the landing's 3D scene, the SQL parser used by the landing
+demo, Lenis and the command palette load on demand.
+
+| Route | Before the redesign | After |
+| --- | ---: | ---: |
+| `/` | 339.5 kB | 235.5 kB |
+| `/login` | 342.6 kB | 192.7 kB |
+| `/signup` | 372.4 kB | 222.2 kB |
+| 404 | 217.2 kB | 176.5 kB |
+| `/app` (Ask) | 377.7 kB | 284.0 kB |
+| `/app/c/[id]` | 377.7 kB | 284.0 kB |
+| `/app/dashboard` | 374.3 kB | 281.4 kB |
+| `/app/upload` (Data) | 270.4 kB | 282.2 kB |
+| `/app/history` (new) | – | 271.7 kB |
+| `/app/settings` (new) | – | 270.5 kB |
+
+Most of the drop comes from replacing Recharts with small SVG charts and loading
+Motion only on the landing page. `/app/upload` grew by 11.8 kB: before, it was the one
+app page without Recharts, and now every app page carries the shared shell (Radix
+menus, hover cards and dialog for the palette and drawer) plus the new table
+explorer. Raw numbers: `docs/perf/bundle-before.json`, `docs/perf/bundle-after.json`.
+
+Also: each page's code is prefetched when the browser is idle after sign-in and on
+nav hover, and its data on nav hover (never anything that calls the AI).
 
 ---
 
@@ -431,6 +544,12 @@ Documented in full in [`.env.example`](.env.example).
 | `npm test` | Unit tests (Vitest), no database or API key needed |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
+| `npm run test:e2e` | Playwright + axe end-to-end suite (read-only, AI mocked); run `npm run build` first |
+| `npm run check:contrast` | WCAG AA check of every colour pair in both themes |
+| `npm run verify` | Contrast, lint, types, unit tests, build and e2e in one go |
+| `npm run bundle:report` | First-load JS per route from a running production server |
+| `npm run screens` | Rebuild, re-capture the README / landing screenshots (light and dark), rebuild |
+| `npm run landing:data` | Refresh the landing page's read-only snapshot of the demo data |
 
 ---
 
@@ -442,15 +561,19 @@ signed-in session, and every query is scoped to the caller's user id.
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `POST` | `/api/chat` | Run the agent for one question; streams NDJSON (`start` → `step`… → `answer`) |
-| `GET` | `/api/conversations` | List the user's conversations |
+| `GET` | `/api/conversations` | List the user's conversations, with turn count and a short preview of the latest answer |
 | `GET` `PATCH` `DELETE` | `/api/conversations/[id]` | Read, rename or delete a conversation |
 | `GET` `POST` | `/api/pins` | List pinned charts / pin an answer to the dashboard |
 | `DELETE` | `/api/pins/[id]` | Unpin a chart |
 | `GET` | `/api/pins/[id]/data` | Re-run a pinned chart's SQL through the safety pipeline |
-| `GET` | `/api/overview` | Dashboard KPIs (revenue, orders, AOV, repeat rate vs. previous period) |
+| `GET` | `/api/overview?days=7\|30\|90` | Dashboard: KPIs with breakdowns and daily series, daily revenue, categories, regions, top products and "worth a look" items, for the last N days of data against the N days before (400 for any other N) |
 | `GET` `POST` | `/api/uploads` | List uploads / upload a CSV (multipart) |
 | `DELETE` | `/api/uploads/[id]` | Drop an uploaded table |
-| `GET` | `/api/datasource` | Tables the agent can see for this user |
+
+The shared demo account cannot rename or delete conversations, unpin charts or delete
+uploads (403), so the examples stay in place for the next visitor.
+| `GET` | `/api/datasource` | Tables the agent can see for this user, with column names, types and business-rule notes (no sample values) |
+| `GET` | `/api/me` | The signed-in account and its question usage (the demo account's daily limit) |
 | `GET` | `/api/models` | Models whose provider key is configured, plus the default |
 | `POST` | `/api/register` | Create an account |
 | `GET` | `/api/cron/cleanup-uploads` | Drop expired uploads (`Authorization: Bearer $CRON_SECRET`) |
@@ -468,26 +591,33 @@ scripts/
   seed.ts                Load demo data and the demo account
   lib/dataset.ts         Deterministic dataset generator
   eval/                  Eval cases and runner
-tests/                   Unit tests (validator, agent loop, helpers)
+  gen-landing-data.ts    Read-only snapshot of demo figures for the landing page
+  check-contrast.mjs     WCAG contrast check of the colour tokens
+  bundle-report.mjs      First-load JS per route
+  screens.mjs            Re-capture README / landing screenshots
+tests/                   Unit and route tests (validator, agent loop, API, helpers)
+  e2e/                   Playwright + axe suite (read-only, AI mocked)
+docs/perf/               Bundle measurements before and after the redesign
 src/
   proxy.ts               Redirects signed-out visitors (Next.js 16 "proxy")
   app/
     (marketing)/         Landing page
     (auth)/              Login, sign-up
-    app/                 Workspace: chat, conversation, dashboard, upload
+    app/                 Workspace: ask, conversation, history, dashboard, data (upload), settings
     api/                 Route handlers: chat (streaming), conversations, pins, uploads, models, …
   server/                Server-only code
     agent/               Agent loop and system prompt
     ai/                  Provider registry (Gemini / OpenAI / Claude)
-    sql/                 Validator, guarded executor, schema introspection
+    sql/                 Guarded executor, schema introspection
     db/                  Prisma client and pg pools
     auth/                Auth.js configuration
-    services/            Conversations, pins, uploads, dashboard overview
-  features/              UI by feature: chat, dashboard, upload, auth, marketing, workspace
+    services/            Conversations, pins, uploads, dashboard figures, data source
+  features/              UI by feature: chat, dashboard, upload, auth, landing, settings, workspace
     <feature>/components/
     <feature>/hooks/
-  components/            Shared UI: charts, data table, SQL block, buttons, providers
-  lib/                   Isomorphic helpers: types, chart logic, formatting, CSV, validation
+  components/            Shared UI: SVG charts, data table, SQL block, buttons, menus, hover card
+  lib/                   Isomorphic code: types, SQL validator, chart logic, dashboard maths,
+                         formatting, CSV, query options shared by hooks and prefetching
 ```
 
 The footer's author name and repository link come from [`src/lib/site.ts`](src/lib/site.ts);
